@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#102b35">
+  <title>KakasaPortal | SACCO records, independently verified</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #17333c;
+      --muted: #71848a;
+      --line: #e5ecea;
+      --canvas: #f5f8f6;
+      --white: #fff;
+      --teal: #137b70;
+      --teal-dark: #0d625a;
+      --teal-light: #e5f4ef;
+      --amber: #a76a13;
+      --amber-light: #fff4df;
+      --red: #b64d45;
+      --red-light: #fff0ed;
+      --nav: #102b35;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--canvas); color: var(--ink); }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    .app { min-height: 100vh; padding-top: 36px; }
+    .environment-bar { position: fixed; z-index: 4; inset: 0 0 auto; height: 36px; display: flex; align-items: center; justify-content: center; background: #edf3f0; border-bottom: 1px solid #dce7e2; }
+    .environment-pill { border: 1px solid #d5e2dc; background: #fff; color: #526b65; border-radius: 20px; padding: 4px 11px; font-size: 10px; font-weight: 650; letter-spacing: .15px; }
+    .sidebar {
+      background: var(--nav); color: #d4e3e1; position: fixed; inset: 36px auto 0 0;
+      width: 248px; padding: 26px 16px; display: flex; flex-direction: column; z-index: 3;
+    }
+    .brand { display: flex; gap: 11px; align-items: center; padding: 0 10px 31px; color: #fff; }
+    .brand-mark { width: 37px; height: 37px; display: grid; place-items: center; border-radius: 12px; background: #1d8679; font-weight: 800; font-size: 19px; }
+    .brand-name { font-size: 17px; font-weight: 750; letter-spacing: -.4px; }
+    .brand-caption { color: #91aaa9; font-size: 10px; margin-top: 2px; letter-spacing: .8px; text-transform: uppercase; }
+    .nav-label { color: #7e999b; font-size: 10px; font-weight: 700; letter-spacing: 1.2px; padding: 0 12px; margin: 4px 0 10px; text-transform: uppercase; }
+    .nav { display: grid; gap: 5px; }
+    .nav button {
+      display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 12px;
+      background: transparent; color: #afc2c0; border: 0; border-radius: 9px; text-align: left; font-size: 13px;
+    }
+    .nav button:hover, .nav button.active { background: #1d4148; color: #fff; }
+    .nav-icon { width: 19px; text-align: center; font-size: 16px; }
+    .side-bottom { margin-top: auto; }
+    .side-note { border: 1px solid #315057; background: #173840; border-radius: 11px; padding: 14px; margin: 0 4px 18px; }
+    .side-note strong { display: block; font-size: 12px; color: #e8f2ed; margin-bottom: 6px; }
+    .side-note span { color: #a8bfbc; font-size: 11px; line-height: 1.5; }
+    .profile { display: flex; align-items: center; gap: 10px; padding: 12px 8px 0; border-top: 1px solid #29444b; }
+    .avatar { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: #d9eee7; color: #14645b; font-weight: 700; font-size: 12px; }
+    .profile strong { display: block; color: #f2f7f4; font-size: 12px; }
+    .profile span { display: block; color: #90a8a7; font-size: 10px; margin-top: 3px; }
+    .main { margin-left: 248px; min-height: 100vh; }
+    .topbar { height: 69px; display: flex; justify-content: space-between; align-items: center; padding: 0 42px; background: #fff; border-bottom: 1px solid var(--line); }
+    .crumb { color: #71848a; font-size: 12px; }
+    .top-actions { display: flex; align-items: center; gap: 20px; margin-left: auto; }
+    .org { font-size: 12px; font-weight: 650; }
+    .content { max-width: 1210px; margin: 0 auto; padding: 34px 42px 55px; }
+    .page-head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 25px; gap: 16px; }
+    .eyebrow { color: var(--teal); font-size: 10px; font-weight: 750; text-transform: uppercase; letter-spacing: 1.25px; margin-bottom: 8px; }
+    h1 { font-size: 27px; letter-spacing: -.8px; margin: 0; line-height: 1.2; }
+    .subtitle { color: var(--muted); font-size: 13px; margin: 7px 0 0; }
+    .button { border: 1px solid #dce6e2; background: #fff; color: var(--ink); border-radius: 8px; padding: 10px 14px; font-size: 12px; font-weight: 650; }
+    .button:hover { border-color: #a8c8bd; background: #f8fcfa; }
+    .button.primary { background: var(--teal); border-color: var(--teal); color: #fff; }
+    .button.primary:hover { background: var(--teal-dark); }
+    .button.small { padding: 7px 10px; font-size: 11px; }
+    .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 19px; }
+    .metric, .panel { background: var(--white); border: 1px solid var(--line); border-radius: 12px; }
+    .metric { padding: 18px 19px; }
+    .metric-label { color: var(--muted); font-size: 11px; }
+    .metric-value { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; font-size: 25px; font-weight: 730; letter-spacing: -.7px; }
+    .metric-icon { width: 31px; height: 31px; display: grid; place-items: center; border-radius: 9px; background: var(--teal-light); color: var(--teal); font-size: 14px; }
+    .metric-foot { color: #72858a; font-size: 10px; margin-top: 7px; }
+    .metric-foot.good { color: var(--teal); }
+    .alert-banner { display: flex; align-items: center; gap: 14px; padding: 15px 17px; background: var(--amber-light); border: 1px solid #f0dfbd; border-radius: 11px; margin-bottom: 19px; }
+    .alert-symbol { width: 35px; height: 35px; display: grid; place-items: center; color: var(--amber); background: #ffebc6; border-radius: 50%; font-weight: 800; }
+    .alert-copy { flex: 1; }
+    .alert-copy strong { display: block; font-size: 12px; color: #704a16; }
+    .alert-copy span { color: #866b41; font-size: 11px; display: block; margin-top: 4px; }
+    .alert-banner .button { background: #fffaf0; border-color: #e6cf9e; color: #79551d; }
+    .panel { overflow: hidden; }
+    .panel-head { display: flex; align-items: center; justify-content: space-between; padding: 17px 19px; border-bottom: 1px solid #edf1ef; }
+    .panel-title { font-size: 13px; font-weight: 700; }
+    .panel-subtitle { font-size: 10px; color: var(--muted); margin-top: 4px; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th { padding: 11px 18px; color: #78898d; font-size: 10px; font-weight: 650; background: #fbfcfb; white-space: nowrap; }
+    td { padding: 13px 18px; border-top: 1px solid #eff2f0; font-size: 11px; white-space: nowrap; }
+    tr.data-row { cursor: pointer; }
+    tr.data-row:hover td { background: #fbfdfc; }
+    .ref { font-weight: 700; color: #24424a; }
+    .muted { color: var(--muted); }
+    .amount { font-weight: 650; }
+    .badge { display: inline-flex; align-items: center; gap: 5px; border-radius: 20px; padding: 5px 8px; font-size: 10px; font-weight: 650; }
+    .badge.ok { color: #18715f; background: #e6f5ee; }
+    .badge.review { color: #986114; background: #fff2dc; }
+    .badge.dot::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+    .table-link { border: 0; color: var(--teal); background: none; font-size: 11px; font-weight: 700; padding: 5px; }
+    .integrity { padding: 18px; }
+    .integrity-line { display: flex; justify-content: space-between; font-size: 11px; margin: 13px 0 8px; }
+    .integrity-line span:last-child { font-weight: 700; color: var(--teal); }
+    .progress { height: 7px; border-radius: 8px; background: #e9f0ed; overflow: hidden; }
+    .progress span { display: block; width: 98.7%; height: 100%; background: #29977d; border-radius: inherit; }
+    .integrity-foot { color: var(--muted); font-size: 10px; line-height: 1.5; margin-top: 10px; }
+    .lookup-panel { padding: 22px; max-width: 760px; }
+    .lookup-panel p { color: var(--muted); font-size: 12px; line-height: 1.55; }
+    .lookup-form { display: flex; gap: 10px; margin-top: 17px; }
+    .lookup-input { flex: 1; min-width: 0; border: 1px solid #d6e2dd; outline: 0; padding: 11px 12px; border-radius: 8px; font-size: 12px; text-transform: uppercase; color: var(--ink); }
+    .lookup-input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px #dcefe9; }
+    .lookup-result { display: none; margin-top: 16px; border: 1px solid var(--line); border-radius: 9px; padding: 15px; }
+    .lookup-result.show { display: block; }
+    .lookup-result-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .lookup-result p { font-size: 11px; margin: 8px 0 0; }
+    .screen { display: none; }
+    .screen.active { display: block; }
+    .back { border: 0; background: transparent; color: var(--teal); font-weight: 700; font-size: 12px; padding: 0; margin-bottom: 21px; }
+    .detail-grid { display: grid; grid-template-columns: 1fr 330px; gap: 16px; align-items: start; }
+    .detail-card { padding: 21px; }
+    .detail-card + .detail-card { margin-top: 15px; }
+    .detail-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
+    .detail-header h2 { font-size: 16px; margin: 0 0 6px; }
+    .detail-header p { font-size: 11px; color: var(--muted); margin: 0; }
+    .detail-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 19px 24px; padding: 20px 0; }
+    .field-label { display: block; color: var(--muted); font-size: 10px; margin-bottom: 6px; }
+    .field-value { font-size: 12px; font-weight: 650; }
+    .hash { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 10px; overflow-wrap: anywhere; color: #4d656a; }
+    .match-box { padding: 13px; background: var(--teal-light); color: #286b5c; border-radius: 8px; font-size: 11px; line-height: 1.6; }
+    .comparison-card { border: 1px solid #e8d7b5; border-radius: 10px; overflow: hidden; }
+    .comparison-title { padding: 12px 14px; background: #fff8e9; color: #79571d; font-size: 11px; font-weight: 750; letter-spacing: .3px; }
+    .comparison-sides { display: grid; grid-template-columns: 1fr 1fr; }
+    .comparison-side { padding: 15px; background: #f4f6f6; }
+    .comparison-side + .comparison-side { border-left: 1px solid #e2ebe6; background: #eaf6f1; }
+    .comparison-label { display: block; color: #64777a; font-size: 9px; font-weight: 750; letter-spacing: .55px; margin-bottom: 10px; }
+    .comparison-side + .comparison-side .comparison-label { color: #397366; }
+    .comparison-amount { font-size: 17px; font-weight: 750; letter-spacing: -.3px; }
+    .comparison-discrepancy { padding: 11px 14px; background: #fff0ed; color: #a3433e; font-size: 11px; font-weight: 750; }
+    .comparison-note { color: var(--muted); font-size: 10px; line-height: 1.5; margin: 10px 1px 0; }
+    .side-action { margin-top: 12px; width: 100%; }
+    .button.audit { background: #a44740; border-color: #a44740; color: #fff; }
+    .button.audit:hover { background: #873c36; }
+    .alert-detail-banner { background: var(--red-light); color: #8f423b; padding: 14px; border-radius: 9px; font-size: 11px; line-height: 1.55; }
+    .alert-detail-banner strong { display: block; margin-bottom: 5px; }
+    .timeline { margin-top: 18px; }
+    .timeline-item { position: relative; padding: 0 0 19px 23px; border-left: 1px solid #dce7e2; margin-left: 5px; color: #52696e; font-size: 11px; line-height: 1.45; }
+    .timeline-item:last-child { border-left-color: transparent; padding-bottom: 0; }
+    .timeline-item::before { content: ""; width: 9px; height: 9px; background: #65a993; border: 2px solid #fff; box-shadow: 0 0 0 1px #aad0c2; border-radius: 50%; position: absolute; left: -6px; top: 1px; }
+    .timeline-item.alert::before { background: #d59737; box-shadow: 0 0 0 1px #eac787; }
+    .timeline-item small { display: block; color: #859397; margin-top: 3px; }
+    .toast { position: fixed; z-index: 5; bottom: 22px; left: 50%; transform: translate(-50%, 20px); padding: 11px 16px; background: #183b42; color: #fff; border-radius: 8px; font-size: 12px; opacity: 0; pointer-events: none; transition: .2s ease; box-shadow: 0 8px 25px #102b3533; }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+    .mobile-menu { display: none; }
+    @media (max-width: 960px) {
+      .sidebar { width: 210px; }
+      .main { margin-left: 210px; }
+      .content { padding: 27px 24px 45px; }
+      .topbar { padding: 0 24px; }
+      .metrics { grid-template-columns: repeat(2, 1fr); }
+      .detail-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 680px) {
+      .sidebar { width: 65px; padding: 17px 8px; }
+      .brand { padding: 0 5px 25px; }
+      .brand-mark { flex: 0 0 38px; }
+      .brand > div:last-child, .nav-label, .nav button .nav-text, .side-note, .profile > div:last-child { display: none; }
+      .nav button { justify-content: center; padding: 11px 5px; }
+      .nav-icon { font-size: 18px; }
+      .profile { justify-content: center; padding-left: 0; padding-right: 0; }
+      .main { margin-left: 65px; }
+      .topbar { height: 58px; padding: 0 15px; }
+      .org { display: none; }
+      .content { padding: 24px 14px 38px; }
+      .page-head { align-items: flex-start; }
+      h1 { font-size: 23px; }
+      .metrics { gap: 9px; }
+      .metric { padding: 13px; }
+      .metric-value { font-size: 21px; }
+      .metric-icon { width: 27px; height: 27px; }
+      .alert-banner { align-items: flex-start; flex-wrap: wrap; }
+      .alert-banner .button { margin-left: 48px; }
+      .detail-fields { gap: 16px 12px; }
+      .environment-pill { font-size: 9px; }
+      .comparison-side { padding: 12px 9px; }
+      .comparison-label { min-height: 24px; line-height: 1.35; }
+      .comparison-amount { font-size: 14px; }
+      .lookup-form { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="environment-bar"><span class="environment-pill">⚙️ Prototype Environment • Connected to Sandbox Ledger</span></div>
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">K</div>
+        <div><div class="brand-name">KakasaPortal</div><div class="brand-caption">Trust, independently verified</div></div>
+      </div>
+      <div class="nav-label">Workspace</div>
+      <nav class="nav" aria-label="Main navigation">
+        <button class="active" data-screen="dashboard"><span class="nav-icon">▦</span><span class="nav-text">Overview</span></button>
+        <button data-screen="transactions"><span class="nav-icon">⇄</span><span class="nav-text">Transactions</span></button>
+        <button data-screen="alert"><span class="nav-icon">⚑</span><span class="nav-text">Alerts <span style="color:#efbf68">· 1</span></span></button>
+      </nav>
+      <div class="side-bottom">
+        <div class="side-note"><strong>Independent by design</strong><span>Transaction fingerprints are checked against a shared, tamper-evident record.</span></div>
+        <div class="profile"><div class="avatar">EE</div><div><strong>Ebaju Edward</strong><span>SACCO administrator</span></div></div>
+      </div>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <div class="crumb">Workspace <span style="padding:0 7px;color:#b4c0bd">/</span> <strong id="crumb-current">Overview</strong></div>
+        <div class="top-actions"><div class="org" title="Makerere Jinja Students Cooperative Union">Makerere Jinja Students Cooperative Union&nbsp; ▾</div></div>
+      </header>
+      <div class="content">
+        <section class="screen active" id="screen-dashboard">
+          <div class="page-head">
+            <div><div class="eyebrow">Wednesday, 21 October 2026</div><h1>Good morning, Ebaju</h1><p class="subtitle">Here’s the independent status of your SACCO records.</p></div>
+            <button class="button" data-action="refresh">↻ &nbsp;Refresh status</button>
+          </div>
+          <div class="metrics">
+            <div class="metric"><div class="metric-label">Transactions checked</div><div class="metric-value">1,284 <span class="metric-icon">✓</span></div><div class="metric-foot good">↑ 8.2% this month</div></div>
+            <div class="metric"><div class="metric-label">Verified records</div><div class="metric-value">1,271 <span class="metric-icon">◈</span></div><div class="metric-foot">Matched to sealed fingerprints</div></div>
+            <div class="metric"><div class="metric-label">Needs review</div><div class="metric-value">1 <span class="metric-icon" style="background:var(--amber-light);color:var(--amber)">!</span></div><div class="metric-foot">One record requires attention</div></div>
+            <div class="metric"><div class="metric-label">Last independent check</div><div class="metric-value" style="font-size:18px">10:42 AM <span class="metric-icon">◷</span></div><div class="metric-foot">Today · 21 Oct 2026</div></div>
+          </div>
+          <div class="alert-banner">
+            <div class="alert-symbol">!</div><div class="alert-copy"><strong>One transaction needs your attention</strong><span>TXN-48291 differs from its independently sealed transaction fingerprint.</span></div>
+            <button class="button" data-screen="alert">Review alert&nbsp; →</button>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><div><div class="panel-title">Recent transactions</div><div class="panel-subtitle">Latest records checked against the independent ledger</div></div><button class="button small" data-screen="transactions">Find a transaction&nbsp; →</button></div>
+            <div class="table-wrap"><table><thead><tr><th>REFERENCE</th><th>DATE &amp; TIME</th><th>TYPE</th><th>MEMBER</th><th>AMOUNT</th><th>STATUS</th><th></th></tr></thead><tbody>
+              <tr class="data-row" data-detail="verified" data-ref="TXN-48304"><td class="ref">TXN-48304</td><td class="muted">21 Oct · 10:42 AM</td><td>Deposit</td><td>ACC-•••-1842</td><td class="amount">UGX 250,000</td><td><span class="badge ok dot">Verified</span></td><td><button class="table-link" data-detail="verified" data-ref="TXN-48304">View</button></td></tr>
+              <tr class="data-row" data-detail="verified" data-ref="TXN-48303"><td class="ref">TXN-48303</td><td class="muted">21 Oct · 10:18 AM</td><td>Loan repayment</td><td>ACC-•••-0951</td><td class="amount">UGX 85,000</td><td><span class="badge ok dot">Verified</span></td><td><button class="table-link" data-detail="verified" data-ref="TXN-48303">View</button></td></tr>
+              <tr class="data-row" data-detail="alert" data-ref="TXN-48291"><td class="ref">TXN-48291</td><td class="muted">21 Oct · 9:06 AM</td><td>Withdrawal</td><td>ACC-•••-6720</td><td class="amount">UGX 1,500,000</td><td><span class="badge review dot">Needs review</span></td><td><button class="table-link" data-detail="alert" data-ref="TXN-48291">View</button></td></tr>
+              <tr class="data-row" data-detail="verified" data-ref="TXN-48288"><td class="ref">TXN-48288</td><td class="muted">21 Oct · 8:51 AM</td><td>Share purchase</td><td>ACC-•••-3318</td><td class="amount">UGX 50,000</td><td><span class="badge ok dot">Verified</span></td><td><button class="table-link" data-detail="verified" data-ref="TXN-48288">View</button></td></tr>
+            </tbody></table></div>
+          </div>
+          <div class="panel integrity" style="margin-top:17px"><div class="panel-title">Record integrity this month</div><div class="integrity-line"><span>Records matching their sealed fingerprint</span><span>98.7%</span></div><div class="progress"><span></span></div><div class="integrity-foot">1,271 of 1,288 records independently checked. Personal information is excluded from the blockchain fingerprint.</div></div>
+        </section>
+
+        <section class="screen" id="screen-transactions">
+          <div class="page-head"><div><div class="eyebrow">Record monitoring</div><h1>Find a transaction</h1><p class="subtitle">Look up an individual record by its reference number.</p></div><span class="badge ok dot">Monitoring active</span></div>
+          <div class="panel lookup-panel">
+            <div class="panel-title">Transaction reference</div>
+            <p>Enter a reference from a SACCO record to view its independent check. Example: TXN-48291.</p>
+            <form class="lookup-form" id="transaction-search-form"><input class="lookup-input" id="transaction-reference" placeholder="Enter transaction reference" aria-label="Transaction reference" autocomplete="off" required><button class="button primary" type="submit">Find record&nbsp; →</button></form>
+            <div class="lookup-result" id="transaction-search-result" role="status" aria-live="polite"></div>
+          </div>
+        </section>
+
+        <section class="screen" id="screen-alert">
+          <button class="back" data-screen="dashboard">← &nbsp;Back to overview</button>
+          <div class="page-head"><div><div class="eyebrow">Alert · 21 October 2026, 9:06 AM</div><h1>Transaction needs review</h1><p class="subtitle">A difference was detected between the SACCO record and the sealed fingerprint.</p></div><span class="badge review dot">Open alert</span></div>
+          <div class="detail-grid">
+            <div>
+              <div class="panel detail-card">
+                <div class="detail-header"><div><h2>Withdrawal · TXN-48291</h2><p>Reference fingerprint: KP-7F29-A4</p></div><span class="badge review dot">Needs review</span></div>
+                <div class="detail-fields">
+                  <div><span class="field-label">Member account</span><span class="field-value">ACC-•••-6720</span></div><div><span class="field-label">Recorded at</span><span class="field-value">21 Oct 2026 · 9:06 AM</span></div>
+                  <div style="grid-column:1/-1"><span class="field-label">Sealed fingerprint</span><span class="field-value hash">8b1c 74a2 e09d 41f7 · 29ac 0d61 7e3b 92f0</span></div>
+                </div>
+                <div class="comparison-card">
+                  <div class="comparison-title">⚠️ ATTENTION: LEDGER MISMATCH DETECTED (TXN-48291)</div>
+                  <div class="comparison-sides">
+                    <div class="comparison-side"><span class="comparison-label">🏦 CURRENT SACCO DATABASE</span><strong class="comparison-amount">UGX 1,500,000</strong></div>
+                    <div class="comparison-side"><span class="comparison-label">🔒 INDEPENDENT BLOCKCHAIN RECORD</span><strong class="comparison-amount">UGX 150,000</strong></div>
+                  </div>
+                  <div class="comparison-discrepancy">🚨 DISCREPANCY: -UGX 1,350,000</div>
+                </div>
+                <p class="comparison-note">The blockchain stores a transaction fingerprint; this comparison shows the transaction details associated with that sealed record.</p>
+              </div>
+              <div class="panel detail-card"><div class="panel-title">What happens next?</div><p style="font-size:11px;color:var(--muted);line-height:1.6;margin-bottom:0">A designated SACCO reviewer should compare this record with the original receipt and supporting documents. KakasaPortal surfaces the difference; it does not decide whether fraud occurred.</p></div>
+            </div>
+            <div>
+              <div class="panel detail-card"><div class="panel-title">Alert actions</div><p style="font-size:11px;color:var(--muted);line-height:1.55">Choose the next step for this discrepancy.</p><button class="button audit side-action" data-action="escalate">Escalate to Audit</button><button class="button side-action" data-action="acknowledge">Acknowledge &amp; Dismiss</button></div>
+              <div class="panel detail-card"><div class="panel-title">Record check history</div><div class="timeline"><div class="timeline-item">Transaction fingerprint sealed<small>21 Oct 2026 · 9:06 AM</small></div><div class="timeline-item">Independent comparison completed<small>21 Oct 2026 · 9:06 AM</small></div><div class="timeline-item alert">Amount difference flagged<small>21 Oct 2026 · 9:06 AM</small></div></div></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen" id="screen-detail">
+          <button class="back" data-screen="dashboard">← &nbsp;Back to overview</button>
+          <div class="page-head"><div><div class="eyebrow">Transaction record</div><h1 id="detail-title">Transaction details</h1><p class="subtitle">Independent record comparison and receipt verification information.</p></div><span class="badge ok dot" id="detail-status">Verified</span></div>
+          <div class="detail-grid">
+            <div class="panel detail-card">
+              <div class="detail-header"><div><h2 id="detail-type">Deposit · TXN-48304</h2><p>Member identity is protected in this view</p></div></div>
+              <div class="detail-fields"><div><span class="field-label">Member account</span><span class="field-value" id="detail-member">ACC-•••-1842</span></div><div><span class="field-label">Recorded at</span><span class="field-value" id="detail-time">21 Oct 2026 · 10:42 AM</span></div><div><span class="field-label">Amount</span><span class="field-value" id="detail-amount">UGX 250,000</span></div><div><span class="field-label">Verification code</span><span class="field-value" id="detail-code">KP4821</span></div><div style="grid-column:1/-1"><span class="field-label">Sealed fingerprint</span><span class="field-value hash">d2a8 119f 7c3e 60b4 · e047 c15a 388d 721b</span></div></div>
+              <div class="match-box" id="detail-match"><strong>✓ Record verified.</strong> The current SACCO entry matches its sealed fingerprint.</div>
+            </div>
+            <div class="panel detail-card"><div class="panel-title">Member receipt check</div><p style="font-size:11px;color:var(--muted);line-height:1.55">Members can independently verify a receipt in the public portal.</p><a class="button primary side-action" href="member-check.html" target="_blank" rel="noopener">Open member portal&nbsp; ↗</a></div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script>
+    const labels = { dashboard: "Overview", transactions: "Transactions", alert: "Alerts", detail: "Transaction details" };
+    const transactionRecords = {
+      "TXN-48304": { type: "Deposit", member: "ACC-•••-1842", amount: "UGX 250,000", time: "21 Oct 2026 · 10:42 AM", status: "verified" },
+      "TXN-48303": { type: "Loan repayment", member: "ACC-•••-0951", amount: "UGX 85,000", time: "21 Oct 2026 · 10:18 AM", status: "verified" },
+      "TXN-48291": { type: "Withdrawal", member: "ACC-•••-6720", amount: "UGX 1,500,000", time: "21 Oct 2026 · 9:06 AM", status: "alert" },
+      "TXN-48288": { type: "Share purchase", member: "ACC-•••-3318", amount: "UGX 50,000", time: "21 Oct 2026 · 8:51 AM", status: "verified" }
+    };
+    const navButtons = document.querySelectorAll(".nav button");
+    function showScreen(name) {
+      document.querySelectorAll(".screen").forEach(screen => screen.classList.toggle("active", screen.id === `screen-${name}`));
+      navButtons.forEach(button => button.classList.toggle("active", button.dataset.screen === name || (name === "detail" && button.dataset.screen === "dashboard")));
+      document.getElementById("crumb-current").textContent = labels[name] || "Overview";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+    function showTransaction(reference) {
+      const record = transactionRecords[reference];
+      if (!record) return false;
+      if (record.status === "alert") {
+        showScreen("alert");
+        return true;
+      }
+      document.getElementById("detail-title").textContent = "Transaction details";
+      document.getElementById("detail-type").textContent = `${record.type} · ${reference}`;
+      document.getElementById("detail-member").textContent = record.member;
+      document.getElementById("detail-time").textContent = record.time;
+      document.getElementById("detail-amount").textContent = record.amount;
+      document.getElementById("detail-code").textContent = reference === "TXN-48304" ? "KP4821" : "Not available";
+      document.getElementById("detail-status").className = "badge ok dot";
+      document.getElementById("detail-status").textContent = "Verified";
+      document.getElementById("detail-match").className = "match-box";
+      document.getElementById("detail-match").innerHTML = "<strong>✓ Record verified.</strong> The current SACCO entry matches its sealed fingerprint.";
+      showScreen("detail");
+      return true;
+    }
+    function toast(message) {
+      const element = document.getElementById("toast");
+      element.textContent = message;
+      element.classList.add("show");
+      window.setTimeout(() => element.classList.remove("show"), 2600);
+    }
+    document.addEventListener("click", event => {
+      const screenButton = event.target.closest("[data-screen]");
+      const detailButton = event.target.closest("[data-detail]");
+      const actionButton = event.target.closest("[data-action]");
+      if (detailButton) {
+        showTransaction(detailButton.dataset.ref);
+        return;
+      }
+      const dataRow = event.target.closest("tr[data-ref]");
+      if (dataRow) { showTransaction(dataRow.dataset.ref); return; }
+      if (screenButton) { showScreen(screenButton.dataset.screen); return; }
+      if (actionButton) {
+        if (actionButton.dataset.action === "refresh") toast("Status refreshed just now.");
+        if (actionButton.dataset.action === "acknowledge") toast("Alert acknowledged and dismissed by Ebaju Edward.");
+        if (actionButton.dataset.action === "escalate") toast("TXN-48291 marked for audit follow-up by Ebaju Edward.");
+      }
+    });
+    document.getElementById("transaction-search-form").addEventListener("submit", event => {
+      event.preventDefault();
+      const reference = document.getElementById("transaction-reference").value.trim().toUpperCase();
+      const result = document.getElementById("transaction-search-result");
+      const record = transactionRecords[reference];
+      result.classList.add("show");
+      if (!record) {
+        result.textContent = "No matching sample transaction was found. Check the reference and try again.";
+        return;
+      }
+      const statusClass = record.status === "alert" ? "review" : "ok";
+      const statusLabel = record.status === "alert" ? "Needs review" : "Verified";
+      result.innerHTML = `<div class="lookup-result-head"><strong class="ref">${reference}</strong><span class="badge ${statusClass} dot">${statusLabel}</span></div><p>${record.type} · ${record.member} · ${record.amount}</p><button class="button small" style="margin-top:12px" data-detail="${record.status}" data-ref="${reference}">Open record&nbsp; →</button>`;
+    });
+  </script>
+</body>
+</html>
