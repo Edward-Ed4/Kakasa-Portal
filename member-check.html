@@ -21,8 +21,9 @@
     body { min-height: 100vh; margin: 0; background: #f5f8f6; color: var(--ink); }
     button, input { font: inherit; }
     button { cursor: pointer; }
-    .environment-bar { height: 36px; display: flex; align-items: center; justify-content: center; background: #edf3f0; border-bottom: 1px solid #dce7e2; }
-    .environment-pill { border: 1px solid #d5e2dc; background: #fff; color: #526b65; border-radius: 20px; padding: 4px 11px; font-size: 10px; font-weight: 650; }
+    .environment-bar { height: 36px; display: flex; align-items: center; padding: 0 24px; background: #243d4b; color: #f3f7f7; }
+    .environment-label { display: inline-flex; align-items: center; gap: 8px; font-size: 10px; font-weight: 700; letter-spacing: .8px; }
+    .environment-label::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #70d1ae; box-shadow: 0 0 0 3px #70d1ae22; }
     .topbar { height: 68px; display: flex; align-items: center; justify-content: space-between; padding: 0 6vw; background: #fff; border-bottom: 1px solid var(--line); }
     .brand { display: flex; gap: 11px; align-items: center; }
     .brand-mark { width: 37px; height: 37px; display: grid; place-items: center; border-radius: 12px; background: #1d8679; color: #fff; font-size: 19px; font-weight: 800; }
@@ -57,12 +58,12 @@
       .intro { min-height: 235px; padding: 22px; }
       .intro h1 { font-size: 23px; margin: 25px 0 9px; }
       .verify-card { padding: 23px; }
-      .environment-pill { font-size: 9px; }
+      .environment-bar { padding: 0 12px; }
     }
   </style>
 </head>
 <body>
-  <div class="environment-bar"><span class="environment-pill">⚙️ Prototype Environment • Connected to Sandbox Ledger</span></div>
+  <div class="environment-bar" role="status"><span class="environment-label">ENV: SANDBOX</span></div>
   <header class="topbar">
     <div class="brand"><div class="brand-mark">K</div><div><div class="brand-name">KakasaPortal</div><div class="brand-caption">Independent record check</div></div></div>
     <div class="sacco-name">Makerere Jinja Students Cooperative Union</div>

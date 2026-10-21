@@ -28,8 +28,9 @@
     button, input { font: inherit; }
     button { cursor: pointer; }
     .app { min-height: 100vh; padding-top: 36px; }
-    .environment-bar { position: fixed; z-index: 4; inset: 0 0 auto; height: 36px; display: flex; align-items: center; justify-content: center; background: #edf3f0; border-bottom: 1px solid #dce7e2; }
-    .environment-pill { border: 1px solid #d5e2dc; background: #fff; color: #526b65; border-radius: 20px; padding: 4px 11px; font-size: 10px; font-weight: 650; letter-spacing: .15px; }
+    .environment-bar { position: fixed; z-index: 4; inset: 0 0 auto; height: 36px; display: flex; align-items: center; padding: 0 24px; background: #243d4b; color: #f3f7f7; }
+    .environment-label { display: inline-flex; align-items: center; gap: 8px; font-size: 10px; font-weight: 700; letter-spacing: .8px; }
+    .environment-label::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #70d1ae; box-shadow: 0 0 0 3px #70d1ae22; }
     .sidebar {
       background: var(--nav); color: #d4e3e1; position: fixed; inset: 36px auto 0 0;
       width: 248px; padding: 26px 16px; display: flex; flex-direction: column; z-index: 3;
@@ -183,7 +184,7 @@
       .alert-banner { align-items: flex-start; flex-wrap: wrap; }
       .alert-banner .button { margin-left: 48px; }
       .detail-fields { gap: 16px 12px; }
-      .environment-pill { font-size: 9px; }
+      .environment-bar { padding: 0 12px; }
       .comparison-side { padding: 12px 9px; }
       .comparison-label { min-height: 24px; line-height: 1.35; }
       .comparison-amount { font-size: 14px; }
@@ -193,7 +194,7 @@
 </head>
 <body>
   <div class="app">
-    <div class="environment-bar"><span class="environment-pill">⚙️ Prototype Environment • Connected to Sandbox Ledger</span></div>
+    <div class="environment-bar" role="status"><span class="environment-label">ENV: SANDBOX</span></div>
     <aside class="sidebar">
       <div class="brand">
         <div class="brand-mark">K</div>
