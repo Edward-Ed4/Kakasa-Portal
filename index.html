@@ -36,7 +36,8 @@
       width: 248px; padding: 26px 16px; display: flex; flex-direction: column; z-index: 3;
     }
     .brand { display: flex; gap: 11px; align-items: center; padding: 0 10px 31px; color: #fff; }
-    .brand-mark { width: 37px; height: 37px; display: grid; place-items: center; border-radius: 12px; background: #1d8679; font-weight: 800; font-size: 19px; }
+    .brand-mark { width: 42px; height: 42px; flex: 0 0 42px; display: grid; place-items: center; overflow: hidden; border-radius: 10px; background: #fff; }
+    .brand-mark img { display: block; width: 100%; height: 100%; object-fit: contain; }
     .brand-name { font-size: 17px; font-weight: 750; letter-spacing: -.4px; }
     .brand-caption { color: #91aaa9; font-size: 10px; margin-top: 2px; letter-spacing: .8px; text-transform: uppercase; }
     .nav-label { color: #7e999b; font-size: 10px; font-weight: 700; letter-spacing: 1.2px; padding: 0 12px; margin: 4px 0 10px; text-transform: uppercase; }
@@ -47,6 +48,10 @@
     }
     .nav button:hover, .nav button.active { background: #1d4148; color: #fff; }
     .nav-icon { width: 19px; text-align: center; font-size: 16px; }
+    .nav-icon svg, .metric-icon svg, .alert-symbol svg { display: block; width: 17px; height: 17px; }
+    .nav-icon svg { width: 18px; height: 18px; }
+    .metric-icon svg { width: 16px; height: 16px; }
+    .icon-sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
     .side-bottom { margin-top: auto; }
     .side-note { border: 1px solid #315057; background: #173840; border-radius: 11px; padding: 14px; margin: 0 4px 18px; }
     .side-note strong { display: block; font-size: 12px; color: #e8f2ed; margin-bottom: 6px; }
@@ -108,6 +113,12 @@
     .progress { height: 7px; border-radius: 8px; background: #e9f0ed; overflow: hidden; }
     .progress span { display: block; width: 98.7%; height: 100%; background: #29977d; border-radius: inherit; }
     .integrity-foot { color: var(--muted); font-size: 10px; line-height: 1.5; margin-top: 10px; }
+    .oversight-note { color: var(--muted); font-size: 11px; line-height: 1.55; margin: -11px 0 18px; }
+    .oversight-table td { white-space: normal; }
+    .oversight-table .sacco-name { min-width: 215px; font-weight: 700; color: #24424a; }
+    .oversight-table .number { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .oversight-table th.number { text-align: right; }
+    .oversight-foot { color: var(--muted); font-size: 10px; line-height: 1.5; padding: 13px 18px; border-top: 1px solid #eff2f0; }
     .lookup-panel { padding: 22px; max-width: 760px; }
     .lookup-panel p { color: var(--muted); font-size: 12px; line-height: 1.55; }
     .lookup-form { display: flex; gap: 10px; margin-top: 17px; }
@@ -193,18 +204,29 @@
   </style>
 </head>
 <body>
+  <svg class="icon-sprite" aria-hidden="true" focusable="false">
+    <symbol id="icon-overview" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="3" width="7" height="5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="11" width="7" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="3" y="14" width="8" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+    <symbol id="icon-transactions" viewBox="0 0 24 24"><path d="M4 7h15m0 0-4-4m4 4-4 4M20 17H5m0 0 4-4m-4 4 4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="icon-alert" viewBox="0 0 24 24"><path d="M5 21V4m0 1c5-3 9 3 14 0v10c-5 3-9-3-14 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="icon-oversight" viewBox="0 0 24 24"><path d="M3 21h18M5 21V8l7-4 7 4v13M9 21v-6h6v6M8 10h.01M12 10h.01M16 10h.01" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="icon-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="icon-records" viewBox="0 0 24 24"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="icon-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 7v5l3 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="icon-warning" viewBox="0 0 24 24"><path d="M12 3 22 20H2L12 3Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 9v5m0 3h.01" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  </svg>
   <div class="app">
     <div class="environment-bar" role="status"><span class="environment-label">ENV: SANDBOX</span></div>
     <aside class="sidebar">
       <div class="brand">
-        <div class="brand-mark">K</div>
+        <div class="brand-mark"><img src="kakasa-mark.png" alt=""></div>
         <div><div class="brand-name">KakasaPortal</div><div class="brand-caption">Trust, independently verified</div></div>
       </div>
       <div class="nav-label">Workspace</div>
       <nav class="nav" aria-label="Main navigation">
-        <button class="active" data-screen="dashboard"><span class="nav-icon">▦</span><span class="nav-text">Overview</span></button>
-        <button data-screen="transactions"><span class="nav-icon">⇄</span><span class="nav-text">Transactions</span></button>
-        <button data-screen="alert"><span class="nav-icon">⚑</span><span class="nav-text">Alerts <span style="color:#efbf68">· 1</span></span></button>
+        <button class="active" data-screen="dashboard" aria-label="Overview" title="Overview"><span class="nav-icon"><svg aria-hidden="true"><use href="#icon-overview"></use></svg></span><span class="nav-text">Overview</span></button>
+        <button data-screen="transactions" aria-label="Transactions" title="Transactions"><span class="nav-icon"><svg aria-hidden="true"><use href="#icon-transactions"></use></svg></span><span class="nav-text">Transactions</span></button>
+        <button data-screen="alert" aria-label="Alerts" title="Alerts"><span class="nav-icon"><svg aria-hidden="true"><use href="#icon-alert"></use></svg></span><span class="nav-text">Alerts <span style="color:#efbf68">· 1</span></span></button>
+        <button data-screen="oversight" aria-label="UMRA oversight" title="UMRA oversight"><span class="nav-icon"><svg aria-hidden="true"><use href="#icon-oversight"></use></svg></span><span class="nav-text">UMRA oversight</span></button>
       </nav>
       <div class="side-bottom">
         <div class="side-note"><strong>Independent by design</strong><span>Transaction fingerprints are checked against a shared, tamper-evident record.</span></div>
@@ -214,26 +236,26 @@
     <main class="main">
       <header class="topbar">
         <div class="crumb">Workspace <span style="padding:0 7px;color:#b4c0bd">/</span> <strong id="crumb-current">Overview</strong></div>
-        <div class="top-actions"><div class="org" title="Makerere Jinja Students Cooperative Union">Makerere Jinja Students Cooperative Union&nbsp; ▾</div></div>
+        <div class="top-actions"><div class="org" id="org-context" title="Makerere Jinja Students Cooperative Union">Makerere Jinja Students Cooperative Union</div></div>
       </header>
       <div class="content">
         <section class="screen active" id="screen-dashboard">
           <div class="page-head">
             <div><div class="eyebrow">Wednesday, 21 October 2026</div><h1>Good morning, Ebaju</h1><p class="subtitle">Here’s the independent status of your SACCO records.</p></div>
-            <button class="button" data-action="refresh">↻ &nbsp;Refresh status</button>
+            <button class="button" data-action="refresh">Refresh status</button>
           </div>
           <div class="metrics">
-            <div class="metric"><div class="metric-label">Transactions checked</div><div class="metric-value">1,284 <span class="metric-icon">✓</span></div><div class="metric-foot good">↑ 8.2% this month</div></div>
-            <div class="metric"><div class="metric-label">Verified records</div><div class="metric-value">1,271 <span class="metric-icon">◈</span></div><div class="metric-foot">Matched to sealed fingerprints</div></div>
-            <div class="metric"><div class="metric-label">Needs review</div><div class="metric-value">1 <span class="metric-icon" style="background:var(--amber-light);color:var(--amber)">!</span></div><div class="metric-foot">One record requires attention</div></div>
-            <div class="metric"><div class="metric-label">Last independent check</div><div class="metric-value" style="font-size:18px">10:42 AM <span class="metric-icon">◷</span></div><div class="metric-foot">Today · 21 Oct 2026</div></div>
+            <div class="metric"><div class="metric-label">Transactions checked</div><div class="metric-value">1,272 <span class="metric-icon"><svg aria-hidden="true"><use href="#icon-check"></use></svg></span></div><div class="metric-foot good">8.2% more than last month</div></div>
+            <div class="metric"><div class="metric-label">Verified records</div><div class="metric-value">1,271 <span class="metric-icon"><svg aria-hidden="true"><use href="#icon-records"></use></svg></span></div><div class="metric-foot">Matched to sealed fingerprints</div></div>
+            <div class="metric"><div class="metric-label">Needs review</div><div class="metric-value">1 <span class="metric-icon" style="background:var(--amber-light);color:var(--amber)"><svg aria-hidden="true"><use href="#icon-warning"></use></svg></span></div><div class="metric-foot">One record requires attention</div></div>
+            <div class="metric"><div class="metric-label">Last independent check</div><div class="metric-value" style="font-size:18px">10:42 AM <span class="metric-icon"><svg aria-hidden="true"><use href="#icon-clock"></use></svg></span></div><div class="metric-foot">Today · 21 Oct 2026</div></div>
           </div>
           <div class="alert-banner">
-            <div class="alert-symbol">!</div><div class="alert-copy"><strong>One transaction needs your attention</strong><span>TXN-48291 differs from its independently sealed transaction fingerprint.</span></div>
-            <button class="button" data-screen="alert">Review alert&nbsp; →</button>
+            <div class="alert-symbol"><svg aria-hidden="true"><use href="#icon-warning"></use></svg></div><div class="alert-copy"><strong>One transaction needs your attention</strong><span>TXN-48291 differs from its independently sealed transaction fingerprint.</span></div>
+            <button class="button" data-screen="alert">Review alert</button>
           </div>
           <div class="panel">
-            <div class="panel-head"><div><div class="panel-title">Recent transactions</div><div class="panel-subtitle">Latest records checked against the independent ledger</div></div><button class="button small" data-screen="transactions">Find a transaction&nbsp; →</button></div>
+            <div class="panel-head"><div><div class="panel-title">Recent transactions</div><div class="panel-subtitle">Latest records checked against the independent ledger</div></div><button class="button small" data-screen="transactions">Find a transaction</button></div>
             <div class="table-wrap"><table><thead><tr><th>REFERENCE</th><th>DATE &amp; TIME</th><th>TYPE</th><th>MEMBER</th><th>AMOUNT</th><th>STATUS</th><th></th></tr></thead><tbody>
               <tr class="data-row" data-detail="verified" data-ref="TXN-48304"><td class="ref">TXN-48304</td><td class="muted">21 Oct · 10:42 AM</td><td>Deposit</td><td>ACC-•••-1842</td><td class="amount">UGX 250,000</td><td><span class="badge ok dot">Verified</span></td><td><button class="table-link" data-detail="verified" data-ref="TXN-48304">View</button></td></tr>
               <tr class="data-row" data-detail="verified" data-ref="TXN-48303"><td class="ref">TXN-48303</td><td class="muted">21 Oct · 10:18 AM</td><td>Loan repayment</td><td>ACC-•••-0951</td><td class="amount">UGX 85,000</td><td><span class="badge ok dot">Verified</span></td><td><button class="table-link" data-detail="verified" data-ref="TXN-48303">View</button></td></tr>
@@ -241,7 +263,7 @@
               <tr class="data-row" data-detail="verified" data-ref="TXN-48288"><td class="ref">TXN-48288</td><td class="muted">21 Oct · 8:51 AM</td><td>Share purchase</td><td>ACC-•••-3318</td><td class="amount">UGX 50,000</td><td><span class="badge ok dot">Verified</span></td><td><button class="table-link" data-detail="verified" data-ref="TXN-48288">View</button></td></tr>
             </tbody></table></div>
           </div>
-          <div class="panel integrity" style="margin-top:17px"><div class="panel-title">Record integrity this month</div><div class="integrity-line"><span>Records matching their sealed fingerprint</span><span>98.7%</span></div><div class="progress"><span></span></div><div class="integrity-foot">1,271 of 1,288 records independently checked. Personal information is excluded from the blockchain fingerprint.</div></div>
+          <div class="panel integrity" style="margin-top:17px"><div class="panel-title">Record integrity this month</div><div class="integrity-line"><span>Records matching their sealed fingerprint</span><span>99.9%</span></div><div class="progress"><span style="width:99.9%"></span></div><div class="integrity-foot">1,271 of 1,272 records matched their sealed fingerprint; one record needs review. Personal information is excluded from the blockchain fingerprint.</div></div>
         </section>
 
         <section class="screen" id="screen-transactions">
@@ -249,29 +271,49 @@
           <div class="panel lookup-panel">
             <div class="panel-title">Transaction reference</div>
             <p>Enter a reference from a SACCO record to view its independent check. Example: TXN-48291.</p>
-            <form class="lookup-form" id="transaction-search-form"><input class="lookup-input" id="transaction-reference" placeholder="Enter transaction reference" aria-label="Transaction reference" autocomplete="off" required><button class="button primary" type="submit">Find record&nbsp; →</button></form>
+            <form class="lookup-form" id="transaction-search-form"><input class="lookup-input" id="transaction-reference" placeholder="Enter transaction reference" aria-label="Transaction reference" autocomplete="off" required><button class="button primary" type="submit">Find record</button></form>
             <div class="lookup-result" id="transaction-search-result" role="status" aria-live="polite"></div>
           </div>
         </section>
 
+        <section class="screen" id="screen-oversight">
+          <div class="page-head"><div><div class="eyebrow">Read-only regulator view</div><h1>UMRA portfolio oversight</h1><p class="subtitle">Independent record integrity across participating SACCOs.</p></div><span class="badge ok dot">Read only</span></div>
+          <p class="oversight-note">This illustrative oversight view summarizes reconciliation health without exposing member names, account numbers, or transaction details.</p>
+          <div class="metrics">
+            <div class="metric"><div class="metric-label">Participating SACCOs</div><div class="metric-value">3</div><div class="metric-foot">Across the connected portfolio</div></div>
+            <div class="metric"><div class="metric-label">Records checked</div><div class="metric-value">3,170</div><div class="metric-foot">Across all participating SACCOs</div></div>
+            <div class="metric"><div class="metric-label">Records needing review</div><div class="metric-value">9</div><div class="metric-foot">Require follow-up by each SACCO</div></div>
+            <div class="metric"><div class="metric-label">Last portfolio reconciliation</div><div class="metric-value" style="font-size:18px">10:42 AM</div><div class="metric-foot">Today · 21 Oct 2026</div></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><div><div class="panel-title">Connected SACCOs</div><div class="panel-subtitle">Portfolio-level reconciliation status</div></div></div>
+            <div class="table-wrap"><table class="oversight-table"><thead><tr><th>SACCO</th><th>INTEGRATION</th><th class="number">CHECKED</th><th class="number">MATCHED</th><th class="number">REVIEW</th><th>LAST RECONCILIATION</th></tr></thead><tbody>
+              <tr><td class="sacco-name">Makerere Jinja Students Cooperative Union</td><td><span class="badge ok dot">Connected</span></td><td class="number">1,272</td><td class="number">1,271</td><td class="number">1</td><td class="muted">10:42 AM</td></tr>
+              <tr><td class="sacco-name">Kampala Teachers Savings Cooperative</td><td><span class="badge ok dot">Connected</span></td><td class="number">842</td><td class="number">842</td><td class="number">0</td><td class="muted">10:31 AM</td></tr>
+              <tr><td class="sacco-name">Lake Region Community Cooperative</td><td><span class="badge ok dot">Connected</span></td><td class="number">1,056</td><td class="number">1,048</td><td class="number">8</td><td class="muted">10:12 AM</td></tr>
+            </tbody></table></div>
+            <div class="oversight-foot">Illustrative portfolio data for the concept demo. UMRA can monitor aggregate integrity indicators; case review remains with the relevant SACCO.</div>
+          </div>
+        </section>
+
         <section class="screen" id="screen-alert">
-          <button class="back" data-screen="dashboard">← &nbsp;Back to overview</button>
-          <div class="page-head"><div><div class="eyebrow">Alert · 21 October 2026, 9:06 AM</div><h1>Transaction needs review</h1><p class="subtitle">A difference was detected between the SACCO record and the sealed fingerprint.</p></div><span class="badge review dot">Open alert</span></div>
+          <button class="back" data-screen="dashboard">Back to overview</button>
+          <div class="page-head"><div><div class="eyebrow">Alert · 21 October 2026, 10:31 AM</div><h1>Transaction needs review</h1><p class="subtitle">A difference was detected between the SACCO record and the sealed fingerprint.</p></div><span class="badge review dot">Open alert</span></div>
           <div class="detail-grid">
             <div>
               <div class="panel detail-card">
-                <div class="detail-header"><div><h2>Withdrawal · TXN-48291</h2><p>Reference fingerprint: KP-7F29-A4</p></div><span class="badge review dot">Needs review</span></div>
+                <div class="detail-header"><div><h2>Withdrawal · TXN-48291</h2><p>Fingerprint reference: 8b1c 74a2 e09d 41f7 · 29ac 0d61 7e3b 92f0</p></div><span class="badge review dot">Needs review</span></div>
                 <div class="detail-fields">
                   <div><span class="field-label">Member account</span><span class="field-value">ACC-•••-6720</span></div><div><span class="field-label">Recorded at</span><span class="field-value">21 Oct 2026 · 9:06 AM</span></div>
                   <div style="grid-column:1/-1"><span class="field-label">Sealed fingerprint</span><span class="field-value hash">8b1c 74a2 e09d 41f7 · 29ac 0d61 7e3b 92f0</span></div>
                 </div>
                 <div class="comparison-card">
-                  <div class="comparison-title">⚠️ ATTENTION: LEDGER MISMATCH DETECTED (TXN-48291)</div>
+                  <div class="comparison-title">Attention · ledger mismatch detected (TXN-48291)</div>
                   <div class="comparison-sides">
-                    <div class="comparison-side"><span class="comparison-label">🏦 CURRENT SACCO DATABASE</span><strong class="comparison-amount">UGX 1,500,000</strong></div>
-                    <div class="comparison-side"><span class="comparison-label">🔒 INDEPENDENT BLOCKCHAIN RECORD</span><strong class="comparison-amount">UGX 150,000</strong></div>
+                    <div class="comparison-side"><span class="comparison-label">CURRENT SACCO DATABASE</span><strong class="comparison-amount">UGX 1,500,000</strong></div>
+                    <div class="comparison-side"><span class="comparison-label">INDEPENDENT BLOCKCHAIN RECORD</span><strong class="comparison-amount">UGX 150,000</strong></div>
                   </div>
-                  <div class="comparison-discrepancy">🚨 DISCREPANCY: -UGX 1,350,000</div>
+                  <div class="comparison-discrepancy">Discrepancy: -UGX 1,350,000</div>
                 </div>
                 <p class="comparison-note">The blockchain stores a transaction fingerprint; this comparison shows the transaction details associated with that sealed record.</p>
               </div>
@@ -279,21 +321,21 @@
             </div>
             <div>
               <div class="panel detail-card"><div class="panel-title">Alert actions</div><p style="font-size:11px;color:var(--muted);line-height:1.55">Choose the next step for this discrepancy.</p><button class="button audit side-action" data-action="escalate">Escalate to Audit</button><button class="button side-action" data-action="acknowledge">Acknowledge &amp; Dismiss</button></div>
-              <div class="panel detail-card"><div class="panel-title">Record check history</div><div class="timeline"><div class="timeline-item">Transaction fingerprint sealed<small>21 Oct 2026 · 9:06 AM</small></div><div class="timeline-item">Independent comparison completed<small>21 Oct 2026 · 9:06 AM</small></div><div class="timeline-item alert">Amount difference flagged<small>21 Oct 2026 · 9:06 AM</small></div></div></div>
+              <div class="panel detail-card"><div class="panel-title">Record check history</div><div class="timeline"><div class="timeline-item">Transaction fingerprint sealed<small>21 Oct 2026 · 9:06 AM</small></div><div class="timeline-item">Independent comparison completed<small>21 Oct 2026 · 9:06 AM</small></div><div class="timeline-item alert">Amount difference flagged at the next reconciliation<small>21 Oct 2026 · 10:31 AM</small></div></div></div>
             </div>
           </div>
         </section>
 
         <section class="screen" id="screen-detail">
-          <button class="back" data-screen="dashboard">← &nbsp;Back to overview</button>
+          <button class="back" data-screen="dashboard">Back to overview</button>
           <div class="page-head"><div><div class="eyebrow">Transaction record</div><h1 id="detail-title">Transaction details</h1><p class="subtitle">Independent record comparison and receipt verification information.</p></div><span class="badge ok dot" id="detail-status">Verified</span></div>
           <div class="detail-grid">
             <div class="panel detail-card">
               <div class="detail-header"><div><h2 id="detail-type">Deposit · TXN-48304</h2><p>Member identity is protected in this view</p></div></div>
               <div class="detail-fields"><div><span class="field-label">Member account</span><span class="field-value" id="detail-member">ACC-•••-1842</span></div><div><span class="field-label">Recorded at</span><span class="field-value" id="detail-time">21 Oct 2026 · 10:42 AM</span></div><div><span class="field-label">Amount</span><span class="field-value" id="detail-amount">UGX 250,000</span></div><div><span class="field-label">Verification code</span><span class="field-value" id="detail-code">KP4821</span></div><div style="grid-column:1/-1"><span class="field-label">Sealed fingerprint</span><span class="field-value hash">d2a8 119f 7c3e 60b4 · e047 c15a 388d 721b</span></div></div>
-              <div class="match-box" id="detail-match"><strong>✓ Record verified.</strong> The current SACCO entry matches its sealed fingerprint.</div>
+              <div class="match-box" id="detail-match"><strong>Record verified.</strong> The current SACCO entry matches its sealed fingerprint.</div>
             </div>
-            <div class="panel detail-card"><div class="panel-title">Member receipt check</div><p style="font-size:11px;color:var(--muted);line-height:1.55">Members can independently verify a receipt in the public portal.</p><a class="button primary side-action" href="member-check.html" target="_blank" rel="noopener">Open member portal&nbsp; ↗</a></div>
+            <div class="panel detail-card"><div class="panel-title">Member receipt check</div><p style="font-size:11px;color:var(--muted);line-height:1.55">Members can independently verify a receipt in the public portal.</p><a class="button primary side-action" href="member-check.html" target="_blank" rel="noopener">Open member portal</a></div>
           </div>
         </section>
 
@@ -302,7 +344,7 @@
   </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script>
-    const labels = { dashboard: "Overview", transactions: "Transactions", alert: "Alerts", detail: "Transaction details" };
+    const labels = { dashboard: "Overview", transactions: "Transactions", alert: "Alerts", oversight: "UMRA oversight", detail: "Transaction details" };
     const transactionRecords = {
       "TXN-48304": { type: "Deposit", member: "ACC-•••-1842", amount: "UGX 250,000", time: "21 Oct 2026 · 10:42 AM", status: "verified" },
       "TXN-48303": { type: "Loan repayment", member: "ACC-•••-0951", amount: "UGX 85,000", time: "21 Oct 2026 · 10:18 AM", status: "verified" },
@@ -314,6 +356,9 @@
       document.querySelectorAll(".screen").forEach(screen => screen.classList.toggle("active", screen.id === `screen-${name}`));
       navButtons.forEach(button => button.classList.toggle("active", button.dataset.screen === name || (name === "detail" && button.dataset.screen === "dashboard")));
       document.getElementById("crumb-current").textContent = labels[name] || "Overview";
+      const orgContext = document.getElementById("org-context");
+      orgContext.textContent = name === "oversight" ? "UMRA · Read-only view" : "Makerere Jinja Students Cooperative Union";
+      orgContext.title = name === "oversight" ? "Aggregate portfolio oversight" : "Makerere Jinja Students Cooperative Union";
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
     function showTransaction(reference) {
@@ -332,7 +377,7 @@
       document.getElementById("detail-status").className = "badge ok dot";
       document.getElementById("detail-status").textContent = "Verified";
       document.getElementById("detail-match").className = "match-box";
-      document.getElementById("detail-match").innerHTML = "<strong>✓ Record verified.</strong> The current SACCO entry matches its sealed fingerprint.";
+      document.getElementById("detail-match").innerHTML = "<strong>Record verified.</strong> The current SACCO entry matches its sealed fingerprint.";
       showScreen("detail");
       return true;
     }
@@ -366,12 +411,12 @@
       const record = transactionRecords[reference];
       result.classList.add("show");
       if (!record) {
-        result.textContent = "No matching sample transaction was found. Check the reference and try again.";
+        result.textContent = "No matching transaction was found. Check the reference and try again.";
         return;
       }
       const statusClass = record.status === "alert" ? "review" : "ok";
       const statusLabel = record.status === "alert" ? "Needs review" : "Verified";
-      result.innerHTML = `<div class="lookup-result-head"><strong class="ref">${reference}</strong><span class="badge ${statusClass} dot">${statusLabel}</span></div><p>${record.type} · ${record.member} · ${record.amount}</p><button class="button small" style="margin-top:12px" data-detail="${record.status}" data-ref="${reference}">Open record&nbsp; →</button>`;
+      result.innerHTML = `<div class="lookup-result-head"><strong class="ref">${reference}</strong><span class="badge ${statusClass} dot">${statusLabel}</span></div><p>${record.type} · ${record.member} · ${record.amount}</p><button class="button small" style="margin-top:12px" data-detail="${record.status}" data-ref="${reference}">Open record</button>`;
     });
   </script>
 </body>
