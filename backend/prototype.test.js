@@ -35,8 +35,52 @@ test("GitHub Pages browser demo keeps verification, sealing, and alerts function
   };
   vm.runInNewContext(fs.readFileSync(path.join(__dirname, "..", "frontend", "static-demo.js"), "utf8"), context);
   const api = window.kakasaStaticApi;
-  assert.equal((await api("/api/dashboard")).stats.transactions, 8);
+  const initialDashboard = await api("/api/dashboard");
+  assert.equal(initialDashboard.stats.transactions, 9);
+  assert.equal(initialDashboard.stats.sealed, 8);
+  assert.equal(initialDashboard.stats.openAlerts, 2);
+  assert.deepEqual([...initialDashboard.saccos].map(sacco => sacco.name), [
+    "Soroti Central Traders SACCO", "Jinja Boda Riders SACCO", "Mbale Farmers Savings SACCO"
+  ]);
+  assert.deepEqual([...initialDashboard.validators].map(validator => validator.name), [
+    "UMRA Observer", "Uganda Co-operative Alliance", "Makerere CoCIS", "Independent Audit Partner"
+  ]);
   assert.equal((await api("/api/verify?code=7Q4M2X")).status, "VALID");
+  const sampleAlerts = (await api("/api/alerts")).alerts;
+  assert.deepEqual([...sampleAlerts].map(alert => alert.status).sort(), ["MODIFIED", "UNANCHORED"]);
+  const legacyState = JSON.parse(values.get("kakasa-static-demo-state-v2"));
+  legacyState.version = 1;
+  legacyState.saccos = [
+    { id: "market-vendors", name: "Demo Market Vendors SACCO", tier: "Standard", district: "Kampala" },
+    { id: "boda-riders", name: "Demo Boda-Boda Riders SACCO", tier: "Pro", district: "Jinja" },
+    { id: "craft-savers", name: "Demo Craft & Savings SACCO", tier: "Lite", district: "Mbarara" }
+  ];
+  legacyState.transactions = legacyState.transactions.filter(transaction => transaction.record.reference !== "BB-2004");
+  const legacyModified = legacyState.transactions.find(transaction => transaction.record.reference === "MV-1004");
+  legacyModified.record.amountUgx = 120000;
+  legacyModified.fingerprint = fingerprint(legacyModified.record);
+  legacyState.alerts = [];
+  const legacyValues = new Map([["kakasa-static-demo-state-v1", JSON.stringify(legacyState)]]);
+  const legacyWindow = {};
+  const legacyContext = {
+    window: legacyWindow,
+    location: context.location,
+    localStorage: {
+      getItem: key => legacyValues.get(key) || null,
+      setItem: (key, value) => legacyValues.set(key, String(value))
+    },
+    crypto: webcrypto,
+    URL,
+    TextEncoder,
+    console
+  };
+  vm.runInNewContext(fs.readFileSync(path.join(__dirname, "..", "frontend", "static-demo.js"), "utf8"), legacyContext);
+  const migratedDashboard = await legacyWindow.kakasaStaticApi("/api/dashboard");
+  assert.equal(migratedDashboard.stats.transactions, 9);
+  assert.equal(migratedDashboard.stats.openAlerts, 2);
+  assert.deepEqual([...migratedDashboard.saccos].map(sacco => sacco.name), [
+    "Soroti Central Traders SACCO", "Jinja Boda Riders SACCO", "Mbale Farmers Savings SACCO"
+  ]);
   await assert.rejects(api("/v1/commit", { method: "POST", body: JSON.stringify({ memberName: "Not accepted" }) }), /Personal or unsupported fields/);
 
   const commit = await api("/v1/commit", {
@@ -60,7 +104,7 @@ test("GitHub Pages browser demo keeps verification, sealing, and alerts function
   await api("/api/alerts/resolve", { method: "POST", body: JSON.stringify({ alertId: alert.id, approvedBy: "Demo Chair", note: "Approved correction for demo." }) });
   assert.equal((await api("/api/alerts")).alerts.find(row => row.id === alert.id).status, "RESOLVED");
 
-  const saved = JSON.parse(values.get("kakasa-static-demo-state-v1"));
+  const saved = JSON.parse(values.get("kakasa-static-demo-state-v2"));
   assert.equal(saved.transactions.some(row => row.record.memberName), false);
 });
 
@@ -110,11 +154,24 @@ test("local prototype completes the receipt, sealing, reconciliation, and API-ke
     return { status: response.status, body: await response.json() };
   };
   const seeded = await get("/api/dashboard");
-  assert.equal(seeded.body.stats.transactions, 8);
+  assert.equal(seeded.body.stats.transactions, 9);
   assert.equal(seeded.body.stats.sealed, 8);
+  assert.equal(seeded.body.stats.openAlerts, 2);
+  assert.equal(seeded.body.stats.matchRate, 88);
+  assert.deepEqual([...seeded.body.saccos].map(sacco => sacco.name), [
+    "Jinja Boda Riders SACCO", "Mbale Farmers Savings SACCO", "Soroti Central Traders SACCO"
+  ]);
+  assert.deepEqual([...seeded.body.validators].map(validator => validator.name), [
+    "UMRA Observer", "Uganda Co-operative Alliance", "Makerere CoCIS", "Independent Audit Partner"
+  ]);
   assert.equal((await fetch(`${origin}/`)).status, 200);
   assert.equal((await fetch(`${origin}/frontend/app.js`)).status, 200);
   assert.equal((await get("/api/verify?code=7Q4M2X")).body.status, "VALID");
+  const initialAlerts = (await get("/api/alerts")).body.alerts;
+  assert.deepEqual([...initialAlerts].map(alert => alert.status).sort(), ["MODIFIED", "UNANCHORED"]);
+  const modifiedSample = (await get("/api/transactions")).body.transactions.find(transaction => transaction.code !== "7Q4M2X" && transaction.type === "DEPOSIT" && transaction.saccoId === "market-vendors");
+  assert.ok(modifiedSample);
+  assert.equal((await get(`/api/verify?code=${modifiedSample.code}`)).body.status, "TAMPERED");
 
   const invalidShape = await get("/v1/commit", {
     method: "POST",
@@ -149,10 +206,10 @@ test("local prototype completes the receipt, sealing, reconciliation, and API-ke
   assert.equal(commit.body.qrPayload.url.startsWith("https://"), true);
   assert.equal((await get(`/api/verify?code=${commit.body.verificationCode}`)).body.status, "PENDING");
   const unanchored = await get("/api/reconcile", { method: "POST" });
-  assert.equal(unanchored.body.discrepancies, 1);
+  assert.equal(unanchored.body.discrepancies, 3);
   assert.equal((await get("/api/alerts")).body.alerts.find(item => item.receiptId === commit.body.receiptId).status, "UNANCHORED");
   const seal = await get("/api/seal", { method: "POST" });
-  assert.equal(seal.body.transactionCount, 1);
+  assert.equal(seal.body.transactionCount, 2);
   assert.equal(seal.body.validators.length, 4);
   assert.equal((await get(`/api/verify?code=${commit.body.verificationCode}`)).body.status, "VALID");
 
@@ -163,7 +220,7 @@ test("local prototype completes the receipt, sealing, reconciliation, and API-ke
   });
   assert.equal(modified.status, 200);
   const reconciliation = await get("/api/reconcile", { method: "POST" });
-  assert.equal(reconciliation.body.discrepancies, 1);
+  assert.equal(reconciliation.body.discrepancies, 2);
   assert.equal((await get(`/api/verify?code=${commit.body.verificationCode}`)).body.status, "TAMPERED");
   const alert = (await get("/api/alerts")).body.alerts.find(item => item.receiptId === commit.body.receiptId);
   assert.equal(alert.status, "MODIFIED");

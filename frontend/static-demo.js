@@ -1,11 +1,12 @@
 (() => {
-  const storageKey = "kakasa-static-demo-state-v1";
+  const storageKey = "kakasa-static-demo-state-v2";
+  const legacyStorageKey = "kakasa-static-demo-state-v1";
   const saccoList = [
-    { id: "market-vendors", name: "Demo Market Vendors SACCO", tier: "Standard", district: "Kampala" },
-    { id: "boda-riders", name: "Demo Boda-Boda Riders SACCO", tier: "Pro", district: "Jinja" },
-    { id: "craft-savers", name: "Demo Craft & Savings SACCO", tier: "Lite", district: "Mbarara" }
+    { id: "market-vendors", name: "Soroti Central Traders SACCO", tier: "Standard", district: "Soroti" },
+    { id: "boda-riders", name: "Jinja Boda Riders SACCO", tier: "Pro", district: "Jinja" },
+    { id: "craft-savers", name: "Mbale Farmers Savings SACCO", tier: "Lite", district: "Mbale" }
   ];
-  const validatorNames = ["Regulator", "Apex Union", "University", "Audit Firm"];
+  const validatorNames = ["UMRA Observer", "Uganda Co-operative Alliance", "Makerere CoCIS", "Independent Audit Partner"];
   const examples = [
     ["market-vendors", "MEM-4512", "DEPOSIT", 250000, "2026-11-17", "MV-1001", "7Q4M2X"],
     ["market-vendors", "MEM-0184", "LOAN_REPAYMENT", 85000, "2026-11-17", "MV-1002"],
@@ -19,7 +20,7 @@
 
   const readState = () => {
     try {
-      return JSON.parse(localStorage.getItem(storageKey) || "null");
+      return JSON.parse(localStorage.getItem(storageKey) || localStorage.getItem(legacyStorageKey) || "null");
     } catch (error) {
       console.error("Could not read the saved Kakasa demo:", error);
       return null;
@@ -57,7 +58,37 @@
 
   async function initialize() {
     const existing = readState();
-    if (existing?.version === 1) return existing;
+    if (existing?.version === 2) return existing;
+    if (existing?.version === 1) {
+      existing.saccos = saccoList;
+      existing.keys ||= [];
+      existing.alerts ||= [];
+      const modified = existing.transactions.find(transaction => transaction.record.reference === "MV-1004");
+      if (!modified) throw new Error("The MV-1004 sample deposit is required for the pilot integrity alert.");
+      modified.record.amountUgx = 130000;
+      modified.fingerprint = await fingerprint(modified.record);
+      let unanchored = existing.transactions.find(transaction => transaction.record.reference === "BB-2004");
+      if (!unanchored) {
+        const record = { saccoId: "boda-riders", memberRef: "MEM-4182", type: "DEPOSIT", amountUgx: 72000, occurredAt: "2026-11-18", reference: "BB-2004" };
+        unanchored = {
+          receiptId: "KKS-PILOT-UNANCHORED", code: code(), saccoId: record.saccoId, memberRef: record.memberRef,
+          record, fingerprint: await fingerprint(record), createdAt: new Date().toISOString(), deletedAt: null
+        };
+        existing.transactions.push(unanchored);
+      }
+      const seededAlerts = [
+        { transaction: modified, status: "MODIFIED", details: "Current deposit amount differs from its sealed SHA-256 fingerprint." },
+        { transaction: unanchored, status: "UNANCHORED", details: "Deposit record is present in the SACCO ledger but has not yet been sealed." }
+      ];
+      for (const { transaction, status, details } of seededAlerts) {
+        if (!existing.alerts.some(alert => alert.receiptId === transaction.receiptId)) {
+          createAlert(existing, { receiptId: transaction.receiptId, saccoId: transaction.saccoId, status, details }, new Date().toISOString());
+        }
+      }
+      existing.version = 2;
+      saveState(existing);
+      return existing;
+    }
     const createdAt = new Date().toISOString();
     const transactions = [];
     for (const [saccoId, memberRef, type, amountUgx, occurredAt, reference, fixedCode] of examples) {
@@ -71,7 +102,7 @@
     const root = await merkleRoot(leaves);
     const anchorId = "ANCHOR-DEMO-0001";
     const state = {
-      version: 1,
+      version: 2,
       saccos: saccoList,
       transactions,
       anchors: [{ id: anchorId, merkle_root: root, tx_count: transactions.length, sealed_at: createdAt }],
@@ -81,6 +112,24 @@
       alerts: [],
       keys: []
     };
+    const modified = transactions.find(transaction => transaction.record.reference === "MV-1004");
+    modified.record.amountUgx = 130000;
+    modified.fingerprint = await fingerprint(modified.record);
+    const unanchoredRecord = { saccoId: "boda-riders", memberRef: "MEM-4182", type: "DEPOSIT", amountUgx: 72000, occurredAt: "2026-11-18", reference: "BB-2004" };
+    const unanchored = {
+      receiptId: "KKS-PILOT-UNANCHORED", code: code(), saccoId: unanchoredRecord.saccoId,
+      memberRef: unanchoredRecord.memberRef, record: unanchoredRecord,
+      fingerprint: await fingerprint(unanchoredRecord), createdAt, deletedAt: null
+    };
+    state.transactions.push(unanchored);
+    createAlert(state, {
+      receiptId: modified.receiptId, saccoId: modified.saccoId, status: "MODIFIED",
+      details: "Current deposit amount differs from its sealed SHA-256 fingerprint."
+    }, createdAt);
+    createAlert(state, {
+      receiptId: unanchored.receiptId, saccoId: unanchored.saccoId, status: "UNANCHORED",
+      details: "Deposit record is present in the SACCO ledger but has not yet been sealed."
+    }, createdAt);
     saveState(state);
     return state;
   }

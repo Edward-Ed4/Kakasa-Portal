@@ -11,7 +11,7 @@ A locally runnable, full-stack prototype for detecting changes to SACCO transact
 npm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000). On first start the server creates `db/kakasa.sqlite` and seeds fictional transactions for Demo Market Vendors SACCO, Demo Boda-Boda Riders SACCO, and Demo Craft & Savings SACCO. A reconciliation worker runs every 60 seconds by default, and reconciliation can also be started on demand in the UI or API. Seed explicitly with `npm run seed` if needed; it only seeds an empty database. Set `PORT` or `KAKASA_DB_PATH` to use another local port or database file.
+Open [http://localhost:3000](http://localhost:3000). On first start the server creates `db/kakasa.sqlite` and seeds fictional transactions for Soroti Central Traders SACCO, Jinja Boda Riders SACCO, and Mbale Farmers Savings SACCO. The initial register includes one `MODIFIED` deposit and one `UNANCHORED` deposit so reconciliation findings are visible immediately. Four simulated validators are UMRA Observer, Uganda Co-operative Alliance, Makerere CoCIS, and Independent Audit Partner. A reconciliation worker runs every 60 seconds by default, and reconciliation can also be started on demand in the UI or API. Seed explicitly with `npm run seed` if needed; it creates fresh data only for an empty database and updates the presentation/sample alerts in an existing demo database without changing the original seal. Set `PORT` or `KAKASA_DB_PATH` to use another local port or database file.
 
 ## Deploy the class demo to Render
 

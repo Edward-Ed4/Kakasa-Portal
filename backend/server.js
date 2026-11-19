@@ -9,7 +9,7 @@ const { seedDemo } = require("./seed");
 seedDemo();
 
 const root = path.resolve(__dirname, "..");
-const validators = ["Regulator", "Apex Union", "University", "Audit Firm"];
+const validators = ["UMRA Observer", "Uganda Co-operative Alliance", "Makerere CoCIS", "Independent Audit Partner"];
 const allowedTypes = new Set(["DEPOSIT", "WITHDRAWAL", "LOAN_REPAYMENT"]);
 const forbiddenFields = new Set(["name", "memberName", "phone", "phoneNumber", "email", "nationalId", "nin", "address"]);
 const saccoReferencePrefixes = { "market-vendors": "MV", "boda-riders": "BB", "craft-savers": "CS" };

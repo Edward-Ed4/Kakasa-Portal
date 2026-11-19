@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#102b35">
+  <meta name="theme-color" content="#12392d">
   <title>KakasaPortal | Independent SACCO record checks</title>
   <link rel="stylesheet" href="styles.css">
   <script>window.KAKASA_STATIC_DEMO = location.hostname === "edward-ed4.github.io";</script>
@@ -14,10 +14,10 @@
   <div class="app-shell">
     <aside class="sidebar">
       <a class="brand" href="./" aria-label="KakasaPortal home">
-        <span class="brand-mark">K</span>
+        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 40 40"><path d="M20 3.5 34 8.7v10.1c0 8.2-5.7 14.3-14 18.1C11.7 33.1 6 27 6 18.8V8.7L20 3.5Z"/><path d="m13.5 20.1 4.2 4.2 8.9-9"/></svg></span>
         <span><strong>KakasaPortal</strong><small>Independent record check</small></span>
       </a>
-      <div class="environment"><span></span> LOCAL SANDBOX</div>
+      <div class="environment"><span></span> Pilot Environment · EAT</div>
       <div class="nav-caption">WORKSPACE</div>
       <nav class="navigation" aria-label="Main navigation">
         <button class="nav-link active" data-view="dashboard"><span>◫</span> Overview</button>
@@ -26,22 +26,18 @@
         <button class="nav-link" data-view="verify"><span>⌕</span> Member verify</button>
         <button class="nav-link" data-view="vendor"><span>⌘</span> Vendor portal</button>
       </nav>
-      <div class="sidebar-bottom">
-        <div class="privacy-card"><span class="privacy-icon">◇</span><strong>Privacy by design</strong><p>Only hashes and pseudonymous references are sealed. No member names or phone numbers go on-chain.</p></div>
-        <div class="sandbox-note"><span class="online-dot"></span> Prototype network <span>v1.0</span></div>
-      </div>
     </aside>
 
     <main class="main">
       <header class="topbar">
-        <div class="mobile-brand"><span class="brand-mark">K</span><strong>KakasaPortal</strong></div>
-        <div class="breadcrumb">DEMO NETWORK <span>/</span> <strong id="current-crumb">Overview</strong></div>
-        <div class="topbar-right"><span class="top-status"><span class="online-dot"></span> All systems operational</span><span class="avatar">DP</span></div>
+        <div class="mobile-brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 40 40"><path d="M20 3.5 34 8.7v10.1c0 8.2-5.7 14.3-14 18.1C11.7 33.1 6 27 6 18.8V8.7L20 3.5Z"/><path d="m13.5 20.1 4.2 4.2 8.9-9"/></svg></span><strong>KakasaPortal</strong></div>
+        <div class="breadcrumb">Pilot Environment · EAT <span>/</span> <strong id="current-crumb">Overview</strong></div>
+        <div class="topbar-right"><span class="top-status"><span class="online-dot"></span> All systems operational</span><span class="avatar">BA</span></div>
       </header>
 
       <section class="view active" id="view-dashboard">
         <div class="page-heading">
-          <div><div class="eyebrow">SACCO integrity workspace</div><h1>Good morning, Demo Partner</h1><p>Independent checks for records across your connected SACCOs.</p></div>
+          <div><div class="eyebrow">SACCO integrity workspace</div><h1>Board &amp; Audit Workspace</h1><p>Independent transaction checks across participating SACCOs.</p></div>
           <div class="heading-actions"><button class="button button-outline" id="reconcile-button">↻ Run reconciliation</button><button class="button button-primary" id="seal-button">Seal pending batch <span>→</span></button></div>
         </div>
         <div class="stat-grid">
@@ -116,7 +112,7 @@
         </article>
       </section>
 
-      <footer class="footer"><span>KakasaPortal <b>·</b> Local prototype only</span><span>Fictional data <b>·</b> No cryptocurrency <b>·</b> No live blockchain</span></footer>
+      <footer class="footer"><span>KakasaPortal · Independent Transaction &amp; Receipt Verification</span></footer>
     </main>
   </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>

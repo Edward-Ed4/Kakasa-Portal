@@ -300,7 +300,4 @@ function setupEvents() {
 }
 
 setupEvents();
-if (window.KAKASA_STATIC_DEMO) {
-  document.querySelector(".footer span").textContent = "GitHub Pages demo · Changes are saved in this browser";
-}
 refresh().catch(error => notify(`Could not load the local demo: ${error.message}`, true));

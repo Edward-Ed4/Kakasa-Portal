@@ -2,15 +2,23 @@ const { db } = require("./store");
 const { fingerprint, merkleRoot, makeCode } = require("./integrity");
 const crypto = require("node:crypto");
 
-const validators = ["Regulator", "Apex Union", "University", "Audit Firm"];
+const validators = ["UMRA Observer", "Uganda Co-operative Alliance", "Makerere CoCIS", "Independent Audit Partner"];
+const saccoNames = [
+  { id: "market-vendors", name: "Soroti Central Traders SACCO", district: "Soroti" },
+  { id: "boda-riders", name: "Jinja Boda Riders SACCO", district: "Jinja" },
+  { id: "craft-savers", name: "Mbale Farmers Savings SACCO", district: "Mbale" }
+];
 
 function seedDemo() {
-  if (db.prepare("SELECT COUNT(*) AS count FROM saccos").get().count > 0) return false;
+  if (db.prepare("SELECT COUNT(*) AS count FROM saccos").get().count > 0) {
+    applyPilotPresentation();
+    return false;
+  }
   const now = new Date().toISOString();
   const saccos = [
-    { id: "market-vendors", name: "Demo Market Vendors SACCO", tier: "Standard", district: "Kampala" },
-    { id: "boda-riders", name: "Demo Boda-Boda Riders SACCO", tier: "Pro", district: "Jinja" },
-    { id: "craft-savers", name: "Demo Craft & Savings SACCO", tier: "Lite", district: "Mbarara" }
+    { ...saccoNames[0], tier: "Standard" },
+    { ...saccoNames[1], tier: "Pro" },
+    { ...saccoNames[2], tier: "Lite" }
   ];
   const insertSacco = db.prepare("INSERT INTO saccos (id, name, tier, district) VALUES (?, ?, ?, ?)");
   for (const sacco of saccos) insertSacco.run(sacco.id, sacco.name, sacco.tier, sacco.district);
@@ -51,8 +59,71 @@ function seedDemo() {
     const saccoId = db.prepare("SELECT sacco_id FROM transactions WHERE receipt_id = ?").get(row.receipt_id).sacco_id;
     insertItem.run(row.receipt_id, anchorId, row.fingerprint, saccoId);
   }
+  applyPilotPresentation();
   console.log(`Seeded ${saccos.length} demo SACCOs and ${receiptIds.length} sealed transactions.`);
   return true;
+}
+
+function applyPilotPresentation() {
+  const updateSacco = db.prepare("UPDATE saccos SET name = ?, district = ? WHERE id = ?");
+  for (const sacco of saccoNames) updateSacco.run(sacco.name, sacco.district, sacco.id);
+
+  const updateValidators = db.prepare("UPDATE anchors SET validators_json = ?");
+  updateValidators.run(JSON.stringify(validators.map(name => ({ name, status: "ONLINE" }))));
+
+  const modified = db.prepare(`
+    SELECT receipt_id, sacco_id, member_ref, record_json FROM transactions
+    WHERE json_extract(record_json, '$.reference') = 'MV-1004'
+  `).get();
+  if (!modified) throw new Error("The MV-1004 sample deposit is required for the pilot integrity alert.");
+  const modifiedRecord = JSON.parse(modified.record_json);
+  if (modifiedRecord.amountUgx === 120000) {
+    modifiedRecord.amountUgx = 130000;
+    db.prepare("UPDATE transactions SET record_json = ?, fingerprint = ? WHERE receipt_id = ?")
+      .run(JSON.stringify(modifiedRecord), fingerprint(modifiedRecord), modified.receipt_id);
+  }
+
+  let unanchored = db.prepare("SELECT receipt_id, sacco_id FROM transactions WHERE json_extract(record_json, '$.reference') = 'BB-2004'").get();
+  if (!unanchored) {
+    const record = {
+      saccoId: "boda-riders", memberRef: "MEM-4182", type: "DEPOSIT",
+      amountUgx: 72000, occurredAt: "2026-11-18", reference: "BB-2004"
+    };
+    const receiptId = makeId("KKS");
+    const insert = db.prepare(`
+      INSERT INTO transactions (receipt_id, code, sacco_id, member_ref, record_json, fingerprint, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `);
+    insert.run(receiptId, uniqueCode(db.prepare("SELECT code FROM transactions WHERE code = ?")), record.saccoId, record.memberRef,
+      JSON.stringify(record), fingerprint(record), new Date().toISOString());
+    unanchored = { receipt_id: receiptId, sacco_id: record.saccoId };
+  }
+
+  const now = new Date().toISOString();
+  const existingAlert = db.prepare("SELECT id, status FROM alerts WHERE receipt_id = ? ORDER BY created_at LIMIT 1");
+  const insertAlert = db.prepare(`
+    INSERT INTO alerts (id, receipt_id, sacco_id, status, details, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `);
+  const updateAlert = db.prepare("UPDATE alerts SET status = ?, details = ?, updated_at = ? WHERE id = ?");
+  const ensureAlert = (receiptId, saccoId, status, details) => {
+    const current = existingAlert.get(receiptId);
+    if (current?.status === "RESOLVED") return;
+    if (current) updateAlert.run(status, details, now, current.id);
+    else insertAlert.run(makeId("ALT"), receiptId, saccoId, status, details, now, now);
+  };
+  ensureAlert(
+    modified.receipt_id,
+    modified.sacco_id,
+    "MODIFIED",
+    "Current deposit amount differs from its sealed SHA-256 fingerprint."
+  );
+  ensureAlert(
+    unanchored.receipt_id,
+    unanchored.sacco_id,
+    "UNANCHORED",
+    "Deposit record is present in the SACCO ledger but has not yet been sealed."
+  );
 }
 
 function uniqueCode(findByCode) {
@@ -61,6 +132,10 @@ function uniqueCode(findByCode) {
     code = makeCode();
   } while (findByCode.get(code));
   return code;
+}
+
+function makeId(prefix) {
+  return `${prefix}-${crypto.randomBytes(5).toString("hex").toUpperCase()}`;
 }
 
 if (require.main === module) seedDemo();
