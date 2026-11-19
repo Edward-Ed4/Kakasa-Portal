@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#102b35">
+  <title>KakasaPortal | Independent SACCO record checks</title>
+  <link rel="stylesheet" href="/frontend/styles.css">
+  <script src="/frontend/app.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="/" aria-label="KakasaPortal home">
+        <span class="brand-mark">K</span>
+        <span><strong>KakasaPortal</strong><small>Independent record check</small></span>
+      </a>
+      <div class="environment"><span></span> LOCAL SANDBOX</div>
+      <div class="nav-caption">WORKSPACE</div>
+      <nav class="navigation" aria-label="Main navigation">
+        <button class="nav-link active" data-view="dashboard"><span>◫</span> Overview</button>
+        <button class="nav-link" data-view="transactions"><span>▤</span> Transactions</button>
+        <button class="nav-link" data-view="alerts"><span>◉</span> Integrity alerts <b id="nav-alert-count">0</b></button>
+        <button class="nav-link" data-view="verify"><span>⌕</span> Member verify</button>
+        <button class="nav-link" data-view="vendor"><span>⌘</span> Vendor portal</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="privacy-card"><span class="privacy-icon">◇</span><strong>Privacy by design</strong><p>Only hashes and pseudonymous references are sealed. No member names or phone numbers go on-chain.</p></div>
+        <div class="sandbox-note"><span class="online-dot"></span> Prototype network <span>v1.0</span></div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="mobile-brand"><span class="brand-mark">K</span><strong>KakasaPortal</strong></div>
+        <div class="breadcrumb">DEMO NETWORK <span>/</span> <strong id="current-crumb">Overview</strong></div>
+        <div class="topbar-right"><span class="top-status"><span class="online-dot"></span> All systems operational</span><span class="avatar">DP</span></div>
+      </header>
+
+      <section class="view active" id="view-dashboard">
+        <div class="page-heading">
+          <div><div class="eyebrow">SACCO integrity workspace</div><h1>Good morning, Demo Partner</h1><p>Independent checks for records across your connected SACCOs.</p></div>
+          <div class="heading-actions"><button class="button button-outline" id="reconcile-button">↻ Run reconciliation</button><button class="button button-primary" id="seal-button">Seal pending batch <span>→</span></button></div>
+        </div>
+        <div class="stat-grid">
+          <article class="stat-card"><div class="stat-label">Transactions monitored <span class="stat-icon teal">▤</span></div><strong id="stat-transactions">—</strong><small>Across connected SACCOs</small></article>
+          <article class="stat-card"><div class="stat-label">Records sealed <span class="stat-icon blue">◈</span></div><strong id="stat-sealed">—</strong><small>Verified batch commitments</small></article>
+          <article class="stat-card"><div class="stat-label">Integrity match rate <span class="stat-icon green">✓</span></div><strong id="stat-match">—</strong><small>Latest reconciliation result</small></article>
+          <article class="stat-card"><div class="stat-label">Open alerts <span class="stat-icon amber">!</span></div><strong id="stat-alerts">—</strong><small>Require board or auditor review</small></article>
+        </div>
+        <div class="content-grid">
+          <article class="panel activity-panel">
+            <div class="panel-heading"><div><h2>Recent transactions</h2><p>Latest records from participating SACCOs</p></div><button class="text-button" data-navigate="transactions">View all →</button></div>
+            <div class="table-wrap"><table><thead><tr><th>RECEIPT / SACCO</th><th>TRANSACTION</th><th>DATE</th><th>STATUS</th><th>SIMULATE</th></tr></thead><tbody id="recent-transactions"></tbody></table></div>
+          </article>
+          <article class="panel network-panel">
+            <div class="panel-heading"><div><h2>Validator network</h2><p>Private consensus participants</p></div><span class="network-badge"><span class="online-dot"></span> 4 of 4 online</span></div>
+            <div id="validator-list" class="validator-list"></div>
+            <div class="root-box"><div><span class="root-label">LATEST SEALED MERKLE ROOT</span><span id="latest-root" class="root-value">Waiting for first seal</span></div><span class="root-icon">◇</span></div>
+            <div class="panel-foot"><span>Consensus: 3 of 4 validators</span><span id="latest-anchor-time">—</span></div>
+          </article>
+        </div>
+        <article class="panel alerts-preview">
+          <div class="panel-heading"><div><h2>Integrity alerts</h2><p>Items requiring investigation</p></div><button class="text-button" data-navigate="alerts">All alerts →</button></div>
+          <div id="alert-preview" class="alert-list"></div>
+        </article>
+      </section>
+
+      <section class="view" id="view-transactions">
+        <div class="page-heading"><div><div class="eyebrow">Audit trail</div><h1>Transactions</h1><p>Current SACCO records, fingerprints, and batch-sealing state.</p></div><button class="button button-outline" id="transactions-refresh">↻ Refresh</button></div>
+        <article class="panel"><div class="table-wrap"><table><thead><tr><th>RECEIPT / CODE</th><th>SACCO</th><th>TYPE / AMOUNT</th><th>MEMBER REF</th><th>FINGERPRINT</th><th>STATUS</th><th>SIMULATE EDIT</th></tr></thead><tbody id="all-transactions"></tbody></table></div></article>
+      </section>
+
+      <section class="view" id="view-alerts">
+        <div class="page-heading"><div><div class="eyebrow">Board and auditor workspace</div><h1>Integrity alerts</h1><p>Reconciliation findings with a traceable resolution and board note.</p></div><div class="heading-actions"><a class="button button-outline" href="/api/report.csv">↓ Export integrity report</a><button class="button button-primary" data-action="reconcile">Run reconciliation →</button></div></div>
+        <article class="panel"><div class="panel-heading"><div><h2>Alert register</h2><p>Modified, deleted, unanchored, and resolved records</p></div><span id="alert-total" class="count-pill">0 alerts</span></div><div id="all-alerts" class="alert-register"></div></article>
+      </section>
+
+      <section class="view" id="view-verify">
+        <div class="page-heading"><div><div class="eyebrow">Member service</div><h1>Verify a transaction</h1><p>Check a receipt using the short code or receipt ID. No account or smartphone required.</p></div></div>
+        <div class="verify-layout">
+          <article class="verify-intro"><div class="verify-symbol">✓</div><div><h2>Your transaction.<br>Verified by you.</h2><p>Enter the code printed on a SACCO receipt. This demo checks the commitment without revealing a member name, phone number, or other personal information.</p></div><div class="privacy-line">◇ &nbsp; Personal details are not part of the public verification record.</div></article>
+          <article class="panel verify-panel">
+            <div class="verify-tabs"><button class="verify-tab active" data-mode="app">Receipt / QR code</button><button class="verify-tab" data-mode="sms">SMS simulator</button></div>
+            <form id="verify-form">
+              <label for="verify-code">Verification code or receipt ID</label>
+              <input id="verify-code" name="code" maxlength="24" placeholder="e.g. 7Q4M2X" autocomplete="off" required>
+              <p class="field-help">Try demo code <button type="button" class="inline-code" id="demo-code">7Q4M2X</button></p>
+              <button class="button button-primary verify-submit" type="submit">Check transaction <span>→</span></button>
+            </form>
+            <div id="sms-simulator" class="sms-simulator" hidden>
+              <div class="sms-bubble"><span class="sms-caption">SMS TO 6006</span><p id="sms-command">KAKASA 7Q4M2X</p></div>
+              <button class="button button-outline" type="button" id="send-sms">Send demo SMS</button>
+            </div>
+            <div class="verify-result" id="verify-result" aria-live="polite"></div>
+            <div class="verify-foot">The short code is also encoded in the receipt QR payload for app-based lookup.</div>
+          </article>
+        </div>
+      </section>
+
+      <section class="view" id="view-vendor">
+        <div class="page-heading"><div><div class="eyebrow">Integration workspace</div><h1>Vendor partner portal</h1><p>Manage sandbox API credentials and explore the transaction ingestion API.</p></div><button class="button button-primary" id="create-key-button">＋ Create API key</button></div>
+        <div class="vendor-grid">
+          <article class="panel"><div class="panel-heading"><div><h2>Connected SACCOs</h2><p>Client tiers and sandbox status</p></div></div><div id="sacco-list" class="sacco-list"></div></article>
+          <article class="panel"><div class="panel-heading"><div><h2>API keys</h2><p>Keys are shown once and stored as hashes.</p></div><span class="lock-badge">⌑ SHA-256</span></div><div id="api-keys" class="api-key-list"></div><div class="key-notice">Creating a key turns on API-key checks for <code>POST /v1/commit</code>. Save the key securely; it cannot be recovered.</div></article>
+        </div>
+        <article class="panel api-panel">
+          <div class="panel-heading"><div><h2>Commit API explorer</h2><p>Fast ingestion returns a receipt before batch sealing.</p></div><span class="method-pill">POST &nbsp; /v1/commit</span></div>
+          <div class="api-explorer">
+            <div><div class="code-caption">SAMPLE REQUEST <span>JSON</span></div><pre id="sample-request"></pre><button class="button button-primary" id="sample-commit">Send sample transaction →</button></div>
+            <div><div class="code-caption">RECEIPT RESPONSE <span id="response-status">READY</span></div><pre id="sample-response">Send a sample request to see the receipt, short code, and QR payload.</pre></div>
+          </div>
+          <div class="endpoint-notes"><span>SHA-256 record fingerprint</span><span>Asynchronous batch queue</span><span>QR payload contains no PII</span></div>
+        </article>
+      </section>
+
+      <footer class="footer"><span>KakasaPortal <b>·</b> Local prototype only</span><span>Fictional data <b>·</b> No cryptocurrency <b>·</b> No live blockchain</span></footer>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <dialog id="resolve-dialog" class="resolve-dialog">
+    <form method="dialog" id="resolve-form">
+      <div class="dialog-heading"><div><div class="eyebrow">Board action</div><h2>Resolve integrity alert</h2></div><button class="close-button" value="cancel" aria-label="Close">×</button></div>
+      <p class="dialog-help">Resolution requires a board-approved note for the audit record.</p>
+      <input type="hidden" id="resolve-alert-id">
+      <label for="approved-by">Approved by</label><input id="approved-by" placeholder="e.g. SACCO Board Chair" required minlength="2">
+      <label for="resolution-note">Board-approved audit note</label><textarea id="resolution-note" rows="4" placeholder="Describe the approved corrective action..." required minlength="8"></textarea>
+      <div class="dialog-actions"><button class="button button-outline" value="cancel">Cancel</button><button class="button button-primary" id="confirm-resolve" value="default">Record resolution</button></div>
+    </form>
+  </dialog>
+</body>
+</html>
