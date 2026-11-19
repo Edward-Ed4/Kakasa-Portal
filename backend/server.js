@@ -378,7 +378,7 @@ const server = http.createServer(async (request, response) => {
       const result = db.prepare("DELETE FROM api_keys WHERE id = ?").run(id);
       return result.changes ? send(response, 200, { deleted: true }) : send(response, 404, { error: "API key not found." });
     }
-    if (method === "GET" && (url.pathname === "/" || url.pathname.startsWith("/frontend/"))) return staticFile(response, url.pathname);
+    if (method === "GET" && (url.pathname === "/" || url.pathname === "/styles.css" || url.pathname === "/app.js" || url.pathname === "/static-demo.js" || url.pathname.startsWith("/frontend/"))) return staticFile(response, url.pathname);
     return send(response, 404, { error: "Not found." });
   } catch (error) {
     if (response.headersSent || response.destroyed) return;

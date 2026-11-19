@@ -19,6 +19,10 @@ The root `render.yaml` defines a free Node web service with an API health check.
 
 **Free-tier limitation:** this service uses SQLite on ephemeral storage. Render may stop a free service while idle, and its database can be reset on restart or redeploy; the fictional seed records are recreated at startup. The hosted demo has no board-user authentication and its sample data and write actions are publicly reachable. Use only this fictional class demo—never enter real member data or API secrets. Persistent storage requires a paid hosting configuration.
 
+## Public lecturer demo
+
+The GitHub Pages deployment publishes `frontend/` as a browser-only demo at [https://edward-ed4.github.io/Kakasa-Portal/](https://edward-ed4.github.io/Kakasa-Portal/). It keeps the same receipt verification, commit, seal, reconciliation, tamper, board-note, and report flows; demo changes are stored in that visitor's browser and do not call the Node API or synchronize between visitors. This is a safe fallback when the Node host is unreachable from a network. The Render deployment above is the actual Node API. Both deployments use fictional data only.
+
 ## Demo walkthrough
 
 1. **Member check:** Open **Member verify**, enter `7Q4M2X`, and check the sealed demo deposit. Switch to **SMS simulator** and send `KAKASA 7Q4M2X` to exercise the feature-phone lookup.

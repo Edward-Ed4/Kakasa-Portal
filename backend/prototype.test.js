@@ -5,6 +5,8 @@ const os = require("node:os");
 const path = require("node:path");
 const net = require("node:net");
 const { test } = require("node:test");
+const vm = require("node:vm");
+const { webcrypto } = require("node:crypto");
 const { fingerprint, merkleRoot } = require("./integrity");
 
 test("hashing is deterministic and Merkle roots change with leaves", () => {
@@ -13,6 +15,53 @@ test("hashing is deterministic and Merkle roots change with leaves", () => {
   assert.notEqual(fingerprint(record), fingerprint({ ...record, amountUgx: 250001 }));
   assert.equal(merkleRoot(["aa".repeat(32)]), "aa".repeat(32));
   assert.notEqual(merkleRoot(["aa".repeat(32), "bb".repeat(32)]), merkleRoot(["aa".repeat(32), "cc".repeat(32)]));
+});
+
+test("GitHub Pages browser demo keeps verification, sealing, and alerts functional", async () => {
+  const values = new Map();
+  const localStorage = {
+    getItem: key => values.get(key) || null,
+    setItem: (key, value) => values.set(key, String(value))
+  };
+  const window = {};
+  const context = {
+    window,
+    location: { hostname: "edward-ed4.github.io", origin: "https://edward-ed4.github.io", pathname: "/Kakasa-Portal/", href: "https://edward-ed4.github.io/Kakasa-Portal/" },
+    localStorage,
+    crypto: webcrypto,
+    URL,
+    TextEncoder,
+    console
+  };
+  vm.runInNewContext(fs.readFileSync(path.join(__dirname, "..", "frontend", "static-demo.js"), "utf8"), context);
+  const api = window.kakasaStaticApi;
+  assert.equal((await api("/api/dashboard")).stats.transactions, 8);
+  assert.equal((await api("/api/verify?code=7Q4M2X")).status, "VALID");
+  await assert.rejects(api("/v1/commit", { method: "POST", body: JSON.stringify({ memberName: "Not accepted" }) }), /Personal or unsupported fields/);
+
+  const commit = await api("/v1/commit", {
+    method: "POST",
+    body: JSON.stringify({ saccoId: "market-vendors", memberRef: "MEM-4512", type: "DEPOSIT", amountUgx: 250000, occurredAt: "2026-11-19", reference: "MV-1010" })
+  });
+  assert.equal(commit.status, "QUEUED");
+  assert.match(commit.qrPayload.url, /^https:\/\/edward-ed4\.github\.io\/Kakasa-Portal\/\?verify=/);
+  assert.equal((await api(`/api/verify?code=${commit.verificationCode}`)).status, "PENDING");
+  await api("/api/reconcile", { method: "POST" });
+  let alert = (await api("/api/alerts")).alerts.find(row => row.receiptId === commit.receiptId);
+  assert.equal(alert.status, "UNANCHORED");
+  await api("/api/seal", { method: "POST" });
+  assert.equal((await api(`/api/verify?code=${commit.verificationCode}`)).status, "VALID");
+
+  await api("/api/tamper", { method: "POST", body: JSON.stringify({ receiptId: commit.receiptId, action: "modify" }) });
+  await api("/api/reconcile", { method: "POST" });
+  assert.equal((await api(`/api/verify?code=${commit.verificationCode}`)).status, "TAMPERED");
+  alert = (await api("/api/alerts")).alerts.find(row => row.receiptId === commit.receiptId);
+  assert.equal(alert.status, "MODIFIED");
+  await api("/api/alerts/resolve", { method: "POST", body: JSON.stringify({ alertId: alert.id, approvedBy: "Demo Chair", note: "Approved correction for demo." }) });
+  assert.equal((await api("/api/alerts")).alerts.find(row => row.id === alert.id).status, "RESOLVED");
+
+  const saved = JSON.parse(values.get("kakasa-static-demo-state-v1"));
+  assert.equal(saved.transactions.some(row => row.record.memberName), false);
 });
 
 test("local prototype completes the receipt, sealing, reconciliation, and API-key flows", async t => {

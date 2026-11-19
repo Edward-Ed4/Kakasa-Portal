@@ -38,6 +38,7 @@ function notify(message, error = false) {
 }
 
 async function api(url, options = {}) {
+  if (window.KAKASA_STATIC_DEMO) return window.kakasaStaticApi(url, options);
   const headers = { ...(options.body ? { "Content-Type": "application/json" } : {}), ...(options.headers || {}) };
   if (localStorage.getItem(savedKeyName)) headers["X-API-Key"] = localStorage.getItem(savedKeyName);
   const response = await fetch(url, { ...options, headers });
@@ -178,6 +179,11 @@ function setupEvents() {
   $$(".nav-link").forEach(button => button.addEventListener("click", () => navigate(button.dataset.view)));
   $$("[data-navigate]").forEach(button => button.addEventListener("click", () => navigate(button.dataset.navigate)));
   document.addEventListener("click", event => {
+    if (window.KAKASA_STATIC_DEMO && event.target.closest('a[href$="api/report.csv"]')) {
+      event.preventDefault();
+      window.kakasaStaticReport().catch(error => notify(error.message, true));
+      return;
+    }
     const tamperButton = event.target.closest("[data-tamper]");
     if (tamperButton) return simulateTampering(tamperButton);
     const resolveButton = event.target.closest("[data-resolve]");
@@ -294,4 +300,7 @@ function setupEvents() {
 }
 
 setupEvents();
+if (window.KAKASA_STATIC_DEMO) {
+  document.querySelector(".footer span").textContent = "GitHub Pages demo · Changes are saved in this browser";
+}
 refresh().catch(error => notify(`Could not load the local demo: ${error.message}`, true));

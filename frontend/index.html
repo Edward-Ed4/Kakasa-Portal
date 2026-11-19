@@ -5,13 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#102b35">
   <title>KakasaPortal | Independent SACCO record checks</title>
-  <link rel="stylesheet" href="/frontend/styles.css">
-  <script src="/frontend/app.js" defer></script>
+  <link rel="stylesheet" href="styles.css">
+  <script>window.KAKASA_STATIC_DEMO = location.hostname === "edward-ed4.github.io";</script>
+  <script src="static-demo.js" defer></script>
+  <script src="app.js" defer></script>
 </head>
 <body>
   <div class="app-shell">
     <aside class="sidebar">
-      <a class="brand" href="/" aria-label="KakasaPortal home">
+      <a class="brand" href="./" aria-label="KakasaPortal home">
         <span class="brand-mark">K</span>
         <span><strong>KakasaPortal</strong><small>Independent record check</small></span>
       </a>
@@ -72,7 +74,7 @@
       </section>
 
       <section class="view" id="view-alerts">
-        <div class="page-heading"><div><div class="eyebrow">Board and auditor workspace</div><h1>Integrity alerts</h1><p>Reconciliation findings with a traceable resolution and board note.</p></div><div class="heading-actions"><a class="button button-outline" href="/api/report.csv">↓ Export integrity report</a><button class="button button-primary" data-action="reconcile">Run reconciliation →</button></div></div>
+        <div class="page-heading"><div><div class="eyebrow">Board and auditor workspace</div><h1>Integrity alerts</h1><p>Reconciliation findings with a traceable resolution and board note.</p></div><div class="heading-actions"><a class="button button-outline" href="api/report.csv">↓ Export integrity report</a><button class="button button-primary" data-action="reconcile">Run reconciliation →</button></div></div>
         <article class="panel"><div class="panel-heading"><div><h2>Alert register</h2><p>Modified, deleted, unanchored, and resolved records</p></div><span id="alert-total" class="count-pill">0 alerts</span></div><div id="all-alerts" class="alert-register"></div></article>
       </section>
 
