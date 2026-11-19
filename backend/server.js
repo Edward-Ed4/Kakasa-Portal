@@ -13,7 +13,7 @@ const validators = ["UMRA Observer", "Uganda Co-operative Alliance", "Makerere C
 const allowedTypes = new Set(["DEPOSIT", "WITHDRAWAL", "LOAN_REPAYMENT"]);
 const forbiddenFields = new Set(["name", "memberName", "phone", "phoneNumber", "email", "nationalId", "nin", "address"]);
 const saccoReferencePrefixes = { "market-vendors": "MV", "boda-riders": "BB", "craft-savers": "CS" };
-const mimeTypes = { ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8" };
+const mimeTypes = { ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".png": "image/png" };
 
 function send(response, status, value, headers = {}) {
   response.writeHead(status, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store", ...headers });
@@ -378,7 +378,7 @@ const server = http.createServer(async (request, response) => {
       const result = db.prepare("DELETE FROM api_keys WHERE id = ?").run(id);
       return result.changes ? send(response, 200, { deleted: true }) : send(response, 404, { error: "API key not found." });
     }
-    if (method === "GET" && (url.pathname === "/" || url.pathname === "/styles.css" || url.pathname === "/app.js" || url.pathname === "/static-demo.js" || url.pathname.startsWith("/frontend/"))) return staticFile(response, url.pathname);
+    if (method === "GET" && (url.pathname === "/" || url.pathname === "/styles.css" || url.pathname === "/app.js" || url.pathname === "/static-demo.js" || url.pathname === "/kakasa-mark.png" || url.pathname.startsWith("/frontend/"))) return staticFile(response, url.pathname);
     return send(response, 404, { error: "Not found." });
   } catch (error) {
     if (response.headersSent || response.destroyed) return;

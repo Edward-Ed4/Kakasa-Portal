@@ -166,6 +166,9 @@ test("local prototype completes the receipt, sealing, reconciliation, and API-ke
   ]);
   assert.equal((await fetch(`${origin}/`)).status, 200);
   assert.equal((await fetch(`${origin}/frontend/app.js`)).status, 200);
+  const logo = await fetch(`${origin}/kakasa-mark.png`);
+  assert.equal(logo.status, 200);
+  assert.equal(logo.headers.get("content-type"), "image/png");
   assert.equal((await get("/api/verify?code=7Q4M2X")).body.status, "VALID");
   const initialAlerts = (await get("/api/alerts")).body.alerts;
   assert.deepEqual([...initialAlerts].map(alert => alert.status).sort(), ["MODIFIED", "UNANCHORED"]);
