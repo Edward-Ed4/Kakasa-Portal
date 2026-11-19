@@ -13,6 +13,12 @@ npm start
 
 Open [http://localhost:3000](http://localhost:3000). On first start the server creates `db/kakasa.sqlite` and seeds fictional transactions for Demo Market Vendors SACCO, Demo Boda-Boda Riders SACCO, and Demo Craft & Savings SACCO. A reconciliation worker runs every 60 seconds by default, and reconciliation can also be started on demand in the UI or API. Seed explicitly with `npm run seed` if needed; it only seeds an empty database. Set `PORT` or `KAKASA_DB_PATH` to use another local port or database file.
 
+## Deploy the class demo to Render
+
+The root `render.yaml` defines a free Node web service with an API health check. To deploy, sign in to Render, choose **New → Blueprint**, connect `Edward-Ed4/Kakasa-Portal`, and create the `kakasa-portal-demo` service from this repository's `render.yaml`. Render builds from `main`; once the deployment is healthy, open its `onrender.com` service URL. The listener binds to the host Render assigns and receipt links use the forwarded HTTPS scheme.
+
+**Free-tier limitation:** this service uses SQLite on ephemeral storage. Render may stop a free service while idle, and its database can be reset on restart or redeploy; the fictional seed records are recreated at startup. The hosted demo has no board-user authentication and its sample data and write actions are publicly reachable. Use only this fictional class demo—never enter real member data or API secrets. Persistent storage requires a paid hosting configuration.
+
 ## Demo walkthrough
 
 1. **Member check:** Open **Member verify**, enter `7Q4M2X`, and check the sealed demo deposit. Switch to **SMS simulator** and send `KAKASA 7Q4M2X` to exercise the feature-phone lookup.

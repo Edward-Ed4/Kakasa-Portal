@@ -121,7 +121,9 @@ function createCommit(body, request) {
     INSERT INTO transactions (receipt_id, code, sacco_id, member_ref, record_json, fingerprint, created_at)
     VALUES (?, ?, ?, ?, ?, ?, ?)
   `).run(receiptId, code, saccoId, memberRef, canonicalRecord(record), hash, now);
-  const baseUrl = `http://${request.headers.host || "localhost:3000"}`;
+  const forwardedProto = String(request.headers["x-forwarded-proto"] || "http").split(",")[0].trim();
+  const protocol = forwardedProto === "https" ? "https" : "http";
+  const baseUrl = `${protocol}://${request.headers.host || "localhost:3000"}`;
   return {
     receiptId,
     verificationCode: code,
@@ -398,7 +400,8 @@ if (reconciliationInterval > 0) {
 }
 
 const port = Number(process.env.PORT || 3000);
-server.listen(port, "127.0.0.1", () => console.log(`KakasaPortal running at http://localhost:${port}`));
+const host = process.env.HOST || "0.0.0.0";
+server.listen(port, host, () => console.log(`KakasaPortal running at http://localhost:${port}`));
 
 function shutdown() {
   server.close(() => {

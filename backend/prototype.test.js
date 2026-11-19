@@ -87,15 +87,17 @@ test("local prototype completes the receipt, sealing, reconciliation, and API-ke
   });
   assert.equal(personalReference.status, 400);
 
-  const commit = await get("/v1/commit", {
+  const commitResponse = await fetch(`${origin}/v1/commit`, {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    headers: { "content-type": "application/json", "x-forwarded-proto": "https" },
     body: JSON.stringify({ saccoId: "market-vendors", memberRef: "MEM-4512", type: "DEPOSIT", amountUgx: 250000, occurredAt: "2026-11-19", reference: "MV-1011" })
   });
+  const commit = { status: commitResponse.status, body: await commitResponse.json() };
   assert.equal(commit.status, 202);
   assert.equal(commit.body.status, "QUEUED");
   assert.equal(commit.body.qrPayload.code, commit.body.verificationCode);
   assert.equal(Object.hasOwn(commit.body.qrPayload, "memberRef"), false);
+  assert.equal(commit.body.qrPayload.url.startsWith("https://"), true);
   assert.equal((await get(`/api/verify?code=${commit.body.verificationCode}`)).body.status, "PENDING");
   const unanchored = await get("/api/reconcile", { method: "POST" });
   assert.equal(unanchored.body.discrepancies, 1);
